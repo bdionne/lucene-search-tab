@@ -102,7 +102,7 @@ public class SearchQueryTest {
                 KoalaOntology.male));
     }
 
-    @Ignore("ThinLuceneSearcher needs refatoring to add an anylzer")
+    @Ignore("ThinLuceneSearcher needs refatoring to add an analyzer")
     public void testExactMatchQuery() throws IOException, QueryEvaluationException {
         KeywordQuery query = getQueryFactory().createExactMatchFilter(KoalaOntology.rdfsLabel, "male");
         Set<OWLEntity> results = getQueryEvaluationResults(query);;

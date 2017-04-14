@@ -69,13 +69,13 @@ public class QueryResultsPanel extends JPanel implements Disposable {
      * @param editorKit OWL Editor Kit
      */
     public QueryResultsPanel(OWLEditorKit editorKit) {
-        //visibilityTimer = new Timer(200, e -> searchProgressBar.setVisible(true));
         this.editorKit = checkNotNull(editorKit);
         this.editorKit.getModelManager().addListener(activeOntologyChanged);
         initUi();
     }
 
-    private void initUi() {
+    @SuppressWarnings("unchecked")
+	private void initUi() {
         setLayout(new BorderLayout());
         setupProgressBar();
 
