@@ -4,6 +4,7 @@ import edu.stanford.protege.search.lucene.tab.engine.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -101,14 +102,14 @@ public class SearchQueryTest {
                 KoalaOntology.male));
     }
 
-    /** @Test
+    @Ignore("ThinLuceneSearcher needs refatoring to add an anylzer")
     public void testExactMatchQuery() throws IOException, QueryEvaluationException {
         KeywordQuery query = getQueryFactory().createExactMatchFilter(KoalaOntology.rdfsLabel, "male");
         Set<OWLEntity> results = getQueryEvaluationResults(query);;
         assertThat(results, hasSize(1));
         assertThat(results, containsInAnyOrder(KoalaOntology.male));
     }
-    **/
+    
 
     @Test
     public void testStartsWithQuery() throws IOException, QueryEvaluationException {
