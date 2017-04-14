@@ -69,13 +69,13 @@ public class QueryResultsPanel extends JPanel implements Disposable {
      * @param editorKit OWL Editor Kit
      */
     public QueryResultsPanel(OWLEditorKit editorKit) {
-        visibilityTimer = new Timer(200, e -> searchProgressBar.setVisible(true));
         this.editorKit = checkNotNull(editorKit);
         this.editorKit.getModelManager().addListener(activeOntologyChanged);
         initUi();
     }
 
-    private void initUi() {
+    @SuppressWarnings("unchecked")
+	private void initUi() {
         setLayout(new BorderLayout());
         setupProgressBar();
 
@@ -103,6 +103,7 @@ public class QueryResultsPanel extends JPanel implements Disposable {
         searchProgressBar = new JProgressBar();
         searchProgressBar.putClientProperty("JComponent.sizeVariant", "small");
         searchProgressBar.setVisible(false);
+        visibilityTimer = new Timer(200, e -> searchProgressBar.setVisible(true));
         editorKit.getSearchManager().addProgressMonitor(new ProgressMonitor() {
             @Override
             public void setStarted() {
@@ -376,10 +377,17 @@ public class QueryResultsPanel extends JPanel implements Disposable {
         	if (!exact) {
         		foundEntities = finder.getMatchingOWLEntities(toMatch);
         	} else {
-        		OWLClass cls = finder.getOWLClass(toMatch);
-        		foundEntities.add(cls);
+        		Set<OWLEntity> ents = finder.getMatchingOWLEntities(toMatch);
+        		for (OWLEntity ent : ents) {
+        			String cs = editorKit.getModelManager().getRendering(ent);
+        			String ucs = LuceneUiUtils.unescape(cs);
+        			if (ucs.toLowerCase().equals(toMatch)) {
+        				foundEntities.add(ent);
+        			}
+        		}		
 
         	}
+        	
         	foundEntities.retainAll(resultsList);
         	output = new ArrayList<>(foundEntities);
         }
@@ -476,7 +484,7 @@ public class QueryResultsPanel extends JPanel implements Disposable {
     }
 
     public void setResults(FilteredQuery query, Collection<OWLEntity> entities, String queryInput, QueryType type) {
-        filterTextField.setText(queryInput);
+        filterTextField.setText(queryInput.toLowerCase());
         setCheckBoxSelection(true);
         exportBtn.setEnabled(true);
         answeredQuery = checkNotNull(query);
