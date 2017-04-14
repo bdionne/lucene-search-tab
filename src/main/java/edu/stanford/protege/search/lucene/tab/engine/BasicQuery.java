@@ -188,11 +188,11 @@ public abstract class BasicQuery implements SearchTabQuery {
         	// value of a basic query there is an implicit conjunction. After splitting the phrase
         	// each one is parsed to normalize and remove stop words
         	String[] terms = searchString.split("\\s+");
-        	for (int i = 0; i < terms.length; i++) {
+        	for (String term : terms) {
         		Query qp = null;
         		try {
         			QueryParser parser = new QueryParser(IndexField.ANNOTATION_TEXT, anal);
-        			qp = parser.parse(terms[i].replaceAll("\\p{P}", ""));
+        			qp = parser.parse(term.replaceAll("\\p{P}", ""));
         		}
         		catch (ParseException e) {
         			qp = LuceneUtils.createTermQuery(IndexField.ANNOTATION_TEXT, ""); // return an empty term query
