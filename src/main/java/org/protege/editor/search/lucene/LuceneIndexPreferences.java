@@ -34,7 +34,6 @@ public class LuceneIndexPreferences {
 
     private static final int ONTOLOGY_IRI_ATTRIBUTE = 0;
     private static final int INDEX_DIRECTORY_ATTRIBUTE = 1;
-    private static final int INDEX_CHECKSUM_ATTRIBUTE = 2;
 
     public static final String LUCENE_INDEX_PREFERENCES_KEY = "LuceneIndexPreferences";
 
@@ -327,7 +326,6 @@ public class LuceneIndexPreferences {
         if (!uncheckedIndexRecord.isPresent()) {
             indexRecord.add(ONTOLOGY_IRI_ATTRIBUTE, "");
             indexRecord.add(INDEX_DIRECTORY_ATTRIBUTE, "");
-            indexRecord.add(INDEX_CHECKSUM_ATTRIBUTE, "");
         } else {
             indexRecord.addAll(uncheckedIndexRecord.get());
         }

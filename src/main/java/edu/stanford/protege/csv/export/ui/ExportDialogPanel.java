@@ -160,7 +160,8 @@ public class ExportDialogPanel extends JPanel implements VerifiedInputEditor {
     private void setupClassList() {
         outputEntitiesList = new MList() {
             protected void handleAdd() {
-                addOutputEntity();
+
+            	addOutputEntity();
             }
 
             protected void handleDelete() {
@@ -270,7 +271,7 @@ public class ExportDialogPanel extends JPanel implements VerifiedInputEditor {
                 if(e.getSource().equals(propertiesList) && propertiesList.getSelectedValue() instanceof OwlPropertyListHeaderItem) {
                     addProperty();
                 } else if(e.getSource().equals(outputEntitiesList) && outputEntitiesList.getSelectedValue() instanceof OwlEntityListHeaderItem) {
-                    addOutputEntity();
+                    //addOutputEntity();
                 }
             } else if(e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
                 if(e.getSource().equals(propertiesList) && propertiesList.getSelectedValue() instanceof OwlEntityListItem) {
@@ -289,7 +290,7 @@ public class ExportDialogPanel extends JPanel implements VerifiedInputEditor {
                 if(e.getSource().equals(propertiesList) && propertiesList.getSelectedValue() instanceof OwlPropertyListHeaderItem) {
                     addProperty();
                 } else if(e.getSource().equals(outputEntitiesList) && outputEntitiesList.getSelectedValue() instanceof OwlEntityListHeaderItem) {
-                    addOutputEntity();
+                    //addOutputEntity();
                 }
             }
         }
