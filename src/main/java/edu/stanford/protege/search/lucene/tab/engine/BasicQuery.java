@@ -67,7 +67,8 @@ public abstract class BasicQuery implements SearchTabQuery {
             this.searcher = searcher;
         }
 
-        public BasicQuery createQuery(OWLProperty property, QueryType type, String searchString) {
+        public BasicQuery createQuery(OWLProperty property, QueryType type, String rawSearchString) {
+        	String searchString = QueryParser.escape(rawSearchString);
             if (QueryType.ValueQueryTypes.contains(type)) {
                 if (type.equals(QueryType.CONTAINS)) {
                     return createContainsFilter(property, toLowerCase(searchString));
