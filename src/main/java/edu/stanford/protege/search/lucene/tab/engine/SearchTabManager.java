@@ -205,7 +205,7 @@ public class SearchTabManager extends LuceneSearcher {
         if (LuceneIndexPreferences.useInMemoryIndexStoring() && isOntologySizeBelowMaximumStoringLimit()) {
             return openIndexDirectoryInMemory();
         } else {
-            return openIndexDirectoryInDisk();
+            return openIndexDirectoryOnDisk();
         }
     }
 
@@ -235,7 +235,7 @@ public class SearchTabManager extends LuceneSearcher {
         return new RAMDirectory();
     }
 
-    private Directory openIndexDirectoryInDisk() {
+    private Directory openIndexDirectoryOnDisk() {
         final IRI ontologyIri = getActiveOntology().getOntologyID().getOntologyIRI().get();
         String indexLocation = LuceneIndexPreferences.getIndexDirectoryLocation(ontologyIri);
         try {
