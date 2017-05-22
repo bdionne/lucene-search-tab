@@ -196,26 +196,24 @@ public class LuceneIndexPreferences {
      * @param ontology
      *            The input ontology to create the index record
      */
-    public static void addIndexRecord(@Nonnull OWLOntology ontology) {
-        checkNotNull(ontology);
-        if (!ontology.isAnonymous()) {
-            IRI ontologyIri = ontology.getOntologyID().getOntologyIRI().get();
-            final String indexRecordKey = createIndexRecordKey(ontologyIri);
-            getPreferences().putStringList(indexRecordKey, createIndexAttributes(ontology));
-            collectIndexRecordKey(indexRecordKey);
-        }
+    public static void addIndexRecord(String indexDirId) {
+
+    	final String indexRecordKey = createIndexRecordKey(indexDirId);
+    	getPreferences().putStringList(indexRecordKey, createIndexAttributes(indexDirId));
+    	collectIndexRecordKey(indexRecordKey);
+
     }
 
     /**
      * Removes the index record given the ontology IRI. This method will also
      * remove the index directory from the file system.
      *
-     * @param ontologyIri
-     *          The input ontology IRI that identifies the index record.
+     * @param indexDirId
+     *          The directory id for the index
      */
-    public static void removeIndexRecord(@Nonnull IRI ontologyIri) {
-        checkNotNull(ontologyIri);
-        final String indexRecordKey = createIndexRecordKey(ontologyIri);
+    public static void removeIndexRecord(String indexDirId) {
+        
+        final String indexRecordKey = createIndexRecordKey(indexDirId);
         deleteIndexDirectory(indexRecordKey);
         getPreferences().putString(indexRecordKey, null);
         discardIndexRecordKey(indexRecordKey);
@@ -231,22 +229,18 @@ public class LuceneIndexPreferences {
      * This method will always return <code>false</code> if the input is an
      * anonymous ontology.
      *
-     * @param ontology
-     *          The input ontology
+     * @param indexDirId
+     *          The unique id that neames the directory where the index is stored
      * @return Returns <code>true</code> if the index record is still relevant
      * with the given input ontology, or <code>false</code> otherwise.
      */
-    public static boolean containsIndexRecord(@Nonnull OWLOntology ontology) {
-        checkNotNull(ontology);
-        if (ontology.isAnonymous()) {
-            return false;
-        }
+    public static boolean containsIndexRecord(String indexDirId) {
+        
         boolean doesContain = true;
-        IRI ontologyIri = ontology.getOntologyID().getOntologyIRI().get();
-        String indexRecordKey = createIndexRecordKey(ontologyIri);
+        String indexRecordKey = createIndexRecordKey(indexDirId);
         Optional<List<String>> indexRecord = getIndexRecord(indexRecordKey);
         if (indexRecord.isPresent()) {
-            String directoryLocation = getIndexDirectoryLocation(ontologyIri);
+            String directoryLocation = getIndexDirectoryLocation(indexDirId);
             if (doesDirectoryExist(directoryLocation)) {
             	
             } else {
@@ -290,14 +284,13 @@ public class LuceneIndexPreferences {
     /**
      * Gets the index directory path given the input ontology IRI.
      *
-     * @param ontologyIri
-     *          The input ontology IRI that identifies the index directory path.
+     * @param indexDirId
+     *          The unique integer id that identifies the index directory path.
      * @return A full path location of the index directory
      */
     @Nonnull
-    public static String getIndexDirectoryLocation(@Nonnull IRI ontologyIri) {
-        checkNotNull(ontologyIri);
-        String indexMapKey = createIndexRecordKey(ontologyIri);
+    public static String getIndexDirectoryLocation(String indexDirId) {
+        String indexMapKey = createIndexRecordKey(indexDirId);
         List<String> indexAttributes = getCheckedIndexRecord(indexMapKey);
         return indexAttributes.get(INDEX_DIRECTORY_ATTRIBUTE);
     }
@@ -332,14 +325,14 @@ public class LuceneIndexPreferences {
         return indexRecord;
     }
 
-    private static String createIndexRecordKey(IRI ontologyIri) {
-        return "KEY:" + ontologyIri.hashCode();
+    private static String createIndexRecordKey(String id) {
+        return "KEY:" + id;
     }
 
-    private static List<String> createIndexAttributes(OWLOntology ontology) {
+    private static List<String> createIndexAttributes(String indexDirId) {
         List<String> indexAttributes = new ArrayList<>();
-        indexAttributes.add(ONTOLOGY_IRI_ATTRIBUTE, fetchOntologyIri(ontology));
-        indexAttributes.add(INDEX_DIRECTORY_ATTRIBUTE, createIndexDirectoryLocation(ontology));
+        indexAttributes.add(ONTOLOGY_IRI_ATTRIBUTE, indexDirId);
+        indexAttributes.add(INDEX_DIRECTORY_ATTRIBUTE, createIndexDirectoryLocation(indexDirId));
         return indexAttributes;
     }
 
@@ -347,11 +340,11 @@ public class LuceneIndexPreferences {
         return ontology.getOntologyID().getOntologyIRI().get().toString();
     }
 
-    private static String createIndexDirectoryLocation(OWLOntology ontology) {
+    private static String createIndexDirectoryLocation(String indexDirId) {
         StringBuffer directoryLocation = new StringBuffer();
         directoryLocation.append(getBaseDirectory());
         directoryLocation.append(fileSystemSeparator);
-        directoryLocation.append(createDirectoryName(ontology.getOntologyID()));
+        directoryLocation.append(createDirectoryName(indexDirId));
         return directoryLocation.toString();
     }
 
@@ -373,8 +366,8 @@ public class LuceneIndexPreferences {
         getPreferences().putStringList(INDEX_RECORD_KEYS, indexMapKeys);
     }
 
-    private static String createDirectoryName(OWLOntologyID ontologyId) {
-        String ontologyIdHex = Integer.toHexString(ontologyId.hashCode());
+    private static String createDirectoryName(String indexDirId) {
+        String ontologyIdHex = indexDirId;
         String timestampHex = Integer.toHexString(new Date().hashCode());
         return String.format("%s-%s-%s", PREFIX_INDEX_DIR, ontologyIdHex, timestampHex);
     }

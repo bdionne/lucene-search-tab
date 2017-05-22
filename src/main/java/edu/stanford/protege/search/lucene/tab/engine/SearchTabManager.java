@@ -57,6 +57,8 @@ public class SearchTabManager extends LuceneSearcher {
     private IndexDelegator indexDelegator;
 
     private SearchContext searchContext;
+    
+    public SearchContext getSearchContext() { return searchContext; }
 
     private OWLModelManagerListener ontologyChangedListener;
 
@@ -210,8 +212,7 @@ public class SearchTabManager extends LuceneSearcher {
     }
 
     private void removeIndexDirectory() {
-        final IRI ontologyIri = getActiveOntology().getOntologyID().getOntologyIRI().get();
-        LuceneIndexPreferences.removeIndexRecord(ontologyIri);
+        LuceneIndexPreferences.removeIndexRecord(searchContext.getIndexDirId());
     }
 
     private boolean isOntologySizeBelowMaximumStoringLimit() {
@@ -236,8 +237,7 @@ public class SearchTabManager extends LuceneSearcher {
     }
 
     private Directory openIndexDirectoryOnDisk() {
-        final IRI ontologyIri = getActiveOntology().getOntologyID().getOntologyIRI().get();
-        String indexLocation = LuceneIndexPreferences.getIndexDirectoryLocation(ontologyIri);
+        String indexLocation = LuceneIndexPreferences.getIndexDirectoryLocation(searchContext.getIndexDirId());
         try {
             logger.info("Opening index directory at " + indexLocation);
             return FSDirectory.open(Paths.get(indexLocation));
@@ -258,9 +258,11 @@ public class SearchTabManager extends LuceneSearcher {
     }
 
     private void initIndexRecord() {
-        if (!LuceneIndexPreferences.containsIndexRecord(getActiveOntology())) {
-            LuceneIndexPreferences.addIndexRecord(getActiveOntology());
-        }
+    	if (!getActiveOntology().isAnonymous()) {
+    		if (!LuceneIndexPreferences.containsIndexRecord(searchContext.getIndexDirId())) {
+    			LuceneIndexPreferences.addIndexRecord(searchContext.getIndexDirId());
+    		}
+    	}
     }
 
     private void initIndexDelegator() {

@@ -54,7 +54,7 @@ public class IndexRecordTable extends JTable {
 
     public void removeIndex(int selectedRow) {
         String ontologyIriString = (String) getValueAt(selectedRow, ONTOLOGY_IRI_COLUMN);
-        LuceneIndexPreferences.removeIndexRecord(IRI.create(ontologyIriString));
+        LuceneIndexPreferences.removeIndexRecord(ontologyIriString);
         ((AbstractTableModel) getModel()).fireTableDataChanged();
     }
 

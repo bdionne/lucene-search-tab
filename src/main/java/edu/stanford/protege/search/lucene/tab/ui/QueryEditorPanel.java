@@ -124,10 +124,10 @@ public class QueryEditorPanel extends JPanel implements Disposable {
                 if(basicQuery != null) {
                 	if (basicQuery.isFullString()) {
                 		queryInput = ((BasicQueryPanel) queryPanel).getInputStringValue();
-                		this.basicQueryType = ((BasicQueryPanel) queryPanel).getSelectedQueryType();
+                		basicQueryType = ((BasicQueryPanel) queryPanel).getSelectedQueryType();
                 	} else {
                 		queryInput = "";
-                		this.basicQueryType = null;
+                		basicQueryType = null;
                 	}
                     builder.add(basicQuery);
                 } else {

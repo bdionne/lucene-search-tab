@@ -4,6 +4,8 @@ import org.protege.editor.owl.OWLEditorKit;
 
 import org.semanticweb.owlapi.model.OWLOntology;
 
+import edu.stanford.protege.search.lucene.tab.engine.IndexDirMapper;
+
 import java.util.Set;
 
 /**
@@ -15,6 +17,12 @@ import java.util.Set;
 public class SearchContext {
 
     private OWLEditorKit editorKit;
+    
+    private IndexDirMapper dirMapper = null;
+    
+    public void setIndexDirMapper(IndexDirMapper mapper) {
+    	dirMapper = mapper;
+    }
 
     public SearchContext(OWLEditorKit editorKit) {
         this.editorKit = editorKit;
@@ -22,6 +30,13 @@ public class SearchContext {
 
     public OWLEditorKit getEditorKit() {
         return editorKit;
+    }
+    
+    public String getIndexDirId() {
+    	if (dirMapper != null) {
+    		return dirMapper.getIndexDirId(getActiveOntology());
+    	}
+    	return new Integer(getActiveOntology().getOntologyID().getOntologyIRI().get().hashCode()).toString();
     }
 
     public OWLOntology getActiveOntology() {
