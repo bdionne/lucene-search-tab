@@ -515,7 +515,7 @@ public class IncQualsOWLCellRenderer implements TableCellRenderer, TreeCellRende
     			
     		}
     		if (user_render != null) {
-    			return user_render.render(rendering);
+    			return user_render.render(object, rendering);
     		} else {
     			return rendering;
     		}
