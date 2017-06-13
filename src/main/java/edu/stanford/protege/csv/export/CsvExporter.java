@@ -104,7 +104,7 @@ public class CsvExporter {
                     row += getPropertyValues(e, property);
                 }
             }
-            rows.add(row);
+            rows.add(row.trim());
         }
         if(includeHeaders) {
             rows.add(0, header);
