@@ -456,6 +456,11 @@ public class QueryResultsPanel extends JPanel implements Disposable {
                 updateStatus(list);
             }
         } else {
+        	paged = false;
+        	pagedResultsList = new ArrayList<>();
+        	totalPages = 0;
+        	currentPage = 0;
+        	
             results.setListData(list.toArray(new OWLEntity[list.size()]));
             if(filteredList) {
                 updateStatus(list);
