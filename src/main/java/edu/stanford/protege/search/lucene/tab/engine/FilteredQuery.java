@@ -103,7 +103,7 @@ public class FilteredQuery extends ComplexQuery {
             return false;
         }
         FilteredQuery other = (FilteredQuery) obj;
-        return this.filters.equals(filters) && this.isMatchAll == other.isMatchAll;
+        return filters.equals(other.filters) && this.isMatchAll == other.isMatchAll;
     }
 
     @Override
