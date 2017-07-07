@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
@@ -195,6 +196,7 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
                     else {
                     	String foo = strip(literal.getLiteral());
                         doc.add(new TextField(IndexField.ANNOTATION_TEXT, foo, Store.YES));
+                        doc.add(new StringField(IndexField.ANNOTATION_FULL_TEXT, foo.toLowerCase(), Store.YES));
                     }
                 }
                 else if (value instanceof IRI) {

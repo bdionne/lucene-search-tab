@@ -66,11 +66,15 @@ public final class QueryType {
     		types.addAll(NonValueQueryTypes);
     	}
     	else if (owlObject instanceof OWLAnnotationProperty) {
-    		if (((OWLAnnotationProperty) owlObject).getIRI().getShortForm().equals("label")) {
+    		/**
+    		 if (((OWLAnnotationProperty) owlObject).getIRI().getShortForm().equals("label")) {
+    		 
     			types.addAll(FullStringQueryTypes);
     		} else {
     			types.addAll(ValueQueryTypes);
     		}
+    		**/
+    		types.addAll(FullStringQueryTypes);
     		types.addAll(NonValueQueryTypes);
 
     	}

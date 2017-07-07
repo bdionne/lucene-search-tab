@@ -33,6 +33,8 @@ public final class IndexField {
     public static final String ANNOTATION_DISPLAY_NAME = "annotationDisplayName";
 
     public static final String ANNOTATION_TEXT = "annotationText";
+    
+    public static final String ANNOTATION_FULL_TEXT = "annotationFullText";
 
     public static final String ANNOTATION_VALUE_IRI = "annotationValueIri";
 
