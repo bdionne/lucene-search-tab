@@ -42,7 +42,7 @@ public class LuceneQueryPanel extends JPanel implements Disposable {
     private void initUi(LuceneTabLayout layout, JButton b) {
         setLayout(new BorderLayout());
         editorPanel = new QueryEditorPanel(editorKit);
-        resultsPanel = new QueryResultsPanel(editorKit, b);
+        resultsPanel = new QueryResultsPanel(editorKit, editorPanel, b);
         if(layout.equals(LuceneTabLayout.VERTICAL)) {
             splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, editorPanel, resultsPanel);
         } else if(layout.equals(LuceneTabLayout.HORIZONTAL)) {

@@ -43,11 +43,12 @@ public class QueryResultsPanel extends JPanel implements Disposable {
     private JList<OWLEntity> results;
     private List<List<OWLEntity>> pagedResultsList;
     private ImmutableList<OWLEntity> resultsList;
-    private List<OWLEntity> txtFieldFilteredResults, entityTypesFilteredResults;
+    private List<OWLEntity> entityTypesFilteredResults;
     private List<OWLEntity> classesList = new ArrayList<>(), propertiesList = new ArrayList<>(),
             individualsList = new ArrayList<>(), datatypesList = new ArrayList<>();
-    private JCheckBox classes, properties, individuals, datatypes;
-    public AugmentedJTextField filterTextField;
+    public JTextField filterTextField;
+    
+    private JButton filterBtn;
     private JLabel statusLbl, pageLbl;
     private JButton exportBtn, backBtn, forwardBtn;
     private int currentPage = 0, totalPages;
@@ -57,9 +58,11 @@ public class QueryResultsPanel extends JPanel implements Disposable {
     private boolean categorisedEntityTypes = false, paged = false;
     
     private JButton gotResult = null;
+    private QueryEditorPanel queryEditorPanel = null;
     
-    public QueryResultsPanel(OWLEditorKit k, JButton b) {
+    public QueryResultsPanel(OWLEditorKit k, QueryEditorPanel qep, JButton b) {
     	this(k);
+    	queryEditorPanel = qep;
     	gotResult = b;    	
     }
 
@@ -159,37 +162,12 @@ public class QueryResultsPanel extends JPanel implements Disposable {
             pageLbl.setText("");
             categorisedEntityTypes = false;
             filterTextField.setText("");
-            setCheckBoxSelection(true);
             clearBuckets();
         }
     };
 
     private ActionListener exportBtnListener = e -> exportResults();
 
-    private ActionListener classesListener = e -> filterEntityType(classes, classesList);
-
-    private ActionListener propertiesListener = e -> filterEntityType(properties, propertiesList);
-
-    private ActionListener individualsListener = e -> filterEntityType(individuals, individualsList);
-
-    private ActionListener datatypesListener = e -> filterEntityType(datatypes, datatypesList);
-
-    private DocumentListener filterTextListener = new DocumentListener() {
-        @Override
-        public void insertUpdate(DocumentEvent e) {
-            filterTextField(true, false);
-        }
-
-        @Override
-        public void removeUpdate(DocumentEvent e) {
-            filterTextField(true, false);
-        }
-
-        @Override
-        public void changedUpdate(DocumentEvent e) {
-            filterTextField(true, false);
-        }
-    };
 
     private MouseListener listMouseListener = new MouseAdapter() {
         @Override
@@ -303,56 +281,66 @@ public class QueryResultsPanel extends JPanel implements Disposable {
         header.add(exportBtn, new GridBagConstraints(4, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_END, GridBagConstraints.NONE, new Insets(0, 2, 0, 0), 0, 0));
         return header;
     }
+    
+    private ActionListener filterBtnListener = e -> {
+    	filterTextField(true, false);
+    };
 
     private JPanel getFooterPanel() {
+    	
+
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        
+        filterBtn = new JButton("Filter");
+        filterBtn.setIcon(LuceneUiUtils.getIcon(LuceneUiUtils.SEARCH_ICON_FILENAME, 15, 15));
+        filterBtn.setIconTextGap(8);
+        filterBtn.setFont(new Font(getFont().getName(), Font.BOLD, 13));
+        filterBtn.addActionListener(filterBtnListener);
+        filterBtn.setEnabled(true);
+        
+        searchPanel.add(filterBtn);
+       
         JPanel footer = new JPanel(new GridBagLayout());
         footer.setPreferredSize(new Dimension(0, 40));
 
-        classes = new JCheckBox("Classes");
-        properties = new JCheckBox("Properties");
-        individuals = new JCheckBox("Individuals");
-        datatypes = new JCheckBox("Datatypes");
-        classes.setSelected(true);
-        properties.setSelected(true);
-        individuals.setSelected(true);
-        datatypes.setSelected(true);
-        classes.addActionListener(classesListener);
-        properties.addActionListener(propertiesListener);
-        individuals.addActionListener(individualsListener);
-        datatypes.addActionListener(datatypesListener);
 
         filterTextField = new AugmentedJTextField("Filter results");
         filterTextField.setMinimumSize(new Dimension(60, 22));
-        filterTextField.getDocument().addDocumentListener(filterTextListener);
+        
+        filterTextField.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					filterTextField(true, false);
+				
+				}
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {}
+        	
+        });
 
         Insets insets = new Insets(2, 4, 2, 4);
         int rowIndex = 0;
         footer.add(filterTextField, new GridBagConstraints(0, rowIndex, 1, 1, 1.0, 0.0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, insets, 0, 0));
-        footer.add(classes, new GridBagConstraints(1, rowIndex, 1, 1, 0.0, 0.0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE, insets, 0, 0));
-        footer.add(properties, new GridBagConstraints(2, rowIndex, 1, 1, 0.0, 0.0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE, insets, 0, 0));
-        footer.add(individuals, new GridBagConstraints(3, rowIndex, 1, 1, 0.0, 0.0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE, insets, 0, 0));
-        footer.add(datatypes, new GridBagConstraints(4, rowIndex, 1, 1, 0.0, 0.0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE, insets, 0, 0));
+        footer.add(searchPanel, new GridBagConstraints(1, rowIndex, 1, 1, 0.0, 0.0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, insets, 0, 0));
+        
         return footer;
+        
     }
-
-    private void filterEntityType(JCheckBox checkBox, List<OWLEntity> bucket) {
+    
+    private void filterEntityType(boolean isSelected, List<OWLEntity> bucket) {
         if(!categorisedEntityTypes && resultsList != null) {
             categoriseEntityTypes();
         }
         entityTypesFilteredResults = new ArrayList<>(getResults());
-        if(!checkBox.isSelected()) {
+        if(!isSelected) {
             entityTypesFilteredResults.removeAll(bucket);
-        } else {
-            filterTextField(false, false);
-            if(txtFieldFilteredResults != null) {
-                List<OWLEntity> l = new ArrayList<>(bucket);
-                l.retainAll(txtFieldFilteredResults);
-                for (OWLEntity e : l) {
-                    if (!entityTypesFilteredResults.contains(e)) {
-                        entityTypesFilteredResults.add(e);
-                    }
-                }
-            }
         }
         Collections.sort(entityTypesFilteredResults);
         setListData(entityTypesFilteredResults, true);
@@ -368,63 +356,8 @@ public class QueryResultsPanel extends JPanel implements Disposable {
             return;
         }
         String toMatch = filterTextField.getText();
-        List<OWLEntity> output;
-        if(toMatch.isEmpty()) {
-            output = new ArrayList<>(resultsList);
-        } else {
-        	OWLEntityFinder finder = editorKit.getModelManager().getOWLEntityFinder();
-        	Set<OWLEntity> foundEntities = new HashSet<OWLEntity>();
-        	if (!exact) {
-        		foundEntities = finder.getMatchingOWLEntities(toMatch);
-        	} else {
-        		Set<OWLEntity> ents = finder.getMatchingOWLEntities(toMatch);
-        		for (OWLEntity ent : ents) {
-        			String cs = editorKit.getModelManager().getRendering(ent);
-        			String ucs = LuceneUiUtils.unescape(cs);
-        			if (ucs.toLowerCase().equals(toMatch)) {
-        				foundEntities.add(ent);
-        			}
-        		}		
-
-        	}
-        	
-        	foundEntities.retainAll(resultsList);
-        	output = new ArrayList<>(foundEntities);
-        }
-        if(filterEntityTypes) {
-            if (!classes.isSelected()) {
-                output.removeAll(classesList);
-            }
-            if (!properties.isSelected()) {
-                output.removeAll(propertiesList);
-            }
-            if (!individuals.isSelected()) {
-                output.removeAll(individualsList);
-            }
-            if (!datatypes.isSelected()) {
-                output.removeAll(datatypesList);
-            }
-        }
-        txtFieldFilteredResults = output;
-        Collections.sort(txtFieldFilteredResults, new Comparator<Object>() {
-
-			@Override
-			public int compare(Object o1, Object o2) {
-				OWLObjectTypeIndexProvider typer = new OWLObjectTypeIndexProvider();
-				OWLEntity e1 = (OWLEntity) o1;
-				OWLEntity e2 = (OWLEntity) o2;
-				int t1 = typer.getTypeIndex(e1);
-				int t2 = typer.getTypeIndex(e2);
-				int diff = t1 - t2;
-				if (diff != 0) {
-					return diff;
-				}
-				String s1 = unescape(editorKit.getModelManager().getRendering(e1)).toUpperCase();
-				String s2 = unescape(editorKit.getModelManager().getRendering(e2)).toUpperCase();
-				//System.out.println("string s1 " + s1 + " string s2 " + s2 + " : " + s1.compareTo(s2));
-				return s1.compareTo(s2);
-			}});
-        setListData(txtFieldFilteredResults, true);
+        queryEditorPanel.filterQuery(toMatch);
+       
     }
 
     private void categoriseEntityTypes() {
@@ -440,6 +373,13 @@ public class QueryResultsPanel extends JPanel implements Disposable {
             }
         }
         categorisedEntityTypes = true;
+    }
+    
+    private void initialFilterEntityTypes() {
+    	filterEntityType(TabPreferences.getDefaultDisplayClasses(), classesList);
+    	filterEntityType(TabPreferences.getDefaultDisplayProperties(), propertiesList);
+    	filterEntityType(TabPreferences.getDefaultDisplayIndividuals(), individualsList);
+    	filterEntityType(TabPreferences.getDefaultDisplayDatatypes(), datatypesList);
     }
 
     private void setListData(List<OWLEntity> list, boolean filteredList) {
@@ -488,9 +428,13 @@ public class QueryResultsPanel extends JPanel implements Disposable {
         }
     }
 
-    public void setResults(FilteredQuery query, Collection<OWLEntity> entities, String queryInput, QueryType type) {
-        filterTextField.setText(queryInput.toLowerCase());
-        setCheckBoxSelection(true);
+    public void setResults(FilteredQuery query, Collection<OWLEntity> entities, boolean clearTxt) {
+    	clearBuckets();
+
+    	if (clearTxt) {
+    		filterTextField.setText("");
+    	}
+        
         exportBtn.setEnabled(true);
         answeredQuery = checkNotNull(query);
         List<OWLEntity> list = new ArrayList<>(entities);
@@ -513,9 +457,15 @@ public class QueryResultsPanel extends JPanel implements Disposable {
 				return s1.compareTo(s2);
 			}});
         resultsList = ImmutableList.copyOf(list);
+        
+        
         entityTypesFilteredResults = resultsList;
-        txtFieldFilteredResults = resultsList;
+        
         setListData(resultsList, true);
+        
+        categoriseEntityTypes();
+        initialFilterEntityTypes();
+        /**
         if (type != null) {
         	if (type.equals(QueryType.EXACT_MATCH_STRING)) {
         		filterTextField(true, true);
@@ -524,6 +474,7 @@ public class QueryResultsPanel extends JPanel implements Disposable {
         		filterTextField(true, false);        		
         	}       	
         }
+        **/
         
     }
     
@@ -571,13 +522,6 @@ public class QueryResultsPanel extends JPanel implements Disposable {
         statusLbl.setText(entities.size() + (entities.size() == 1 ? " match" : " matches"));
     }
 
-    public void setCheckBoxSelection(boolean selected) {
-        classes.setSelected(selected);
-        properties.setSelected(selected);
-        individuals.setSelected(selected);
-        datatypes.setSelected(selected);
-    }
-
     private void clearBuckets() {
         classesList.clear();
         propertiesList.clear();
@@ -588,11 +532,6 @@ public class QueryResultsPanel extends JPanel implements Disposable {
     @Override
     public void dispose() {
         exportBtn.removeActionListener(exportBtnListener);
-        classes.removeActionListener(classesListener);
-        properties.removeActionListener(propertiesListener);
-        individuals.removeActionListener(individualsListener);
-        datatypes.removeActionListener(datatypesListener);
-        filterTextField.getDocument().removeDocumentListener(filterTextListener);
         results.removeMouseListener(listMouseListener);
         results.removeKeyListener(listKeyListener);
         editorKit.getModelManager().removeListener(activeOntologyChanged);

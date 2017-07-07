@@ -22,17 +22,66 @@ public class TabPreferences {
     private static final String OWL_PROPERTY = "defaultProperty";
     private static final String RESULTS_PER_PAGE = "defaultResultsPerPage";
     private static final String QUERY_TYPE = "defaultQueryType";
+    private static final String FILTER_QUERY_TYPE = "defaultFilterQueryType";
+    
+    private static final String DISPLAY_CLASSES = "displayClasses";
+    private static final String DISPLAY_PROPERTIES = "displayProperties";
+    private static final String DISPLAY_INDIVIDUALS = "displayIndividuals";
+    private static final String DISPLAY_DATATYPES = "displayDatatypes";
 
     private static final int defaultResultsPerPage = 50;
     private static final QueryType defaultQueryType = QueryType.CONTAINS;
+    private static final QueryType defaultFilterQueryType = QueryType.CONTAINS;
     private static final OWLProperty defaultProperty = OWLManager.getOWLDataFactory().getRDFSLabel();
+    
+    private static final boolean defaultDisplayClasses = true;
+    private static final boolean defaultDisplayProperties = false;
+    private static final boolean defaultDisplayIndividuals = false;
+    private static final boolean defaultDisplayDatatypes = false;
 
     private static Preferences getPreferences() {
         return PreferencesManager.getInstance().getApplicationPreferences(PREFERENCES_KEY);
     }
+    
+    public static boolean getDefaultDisplayClasses() {
+    	return getPreferences().getBoolean(DISPLAY_CLASSES, defaultDisplayClasses);
+    }
+    
+    public static void setDefaultDisplayClasses(boolean b) {
+    	getPreferences().putBoolean(DISPLAY_CLASSES, b);
+    }
+    
+    public static boolean getDefaultDisplayProperties() {
+    	return getPreferences().getBoolean(DISPLAY_PROPERTIES, defaultDisplayProperties);
+    }
+    
+    public static void setDefaultDisplayProperties(boolean b) {
+    	getPreferences().putBoolean(DISPLAY_PROPERTIES, b);
+    }
+    
+    public static boolean getDefaultDisplayIndividuals() {
+    	return getPreferences().getBoolean(DISPLAY_INDIVIDUALS, defaultDisplayIndividuals);
+    }
+    
+    public static void setDefaultDisplayIndividuals(boolean b) {
+    	getPreferences().putBoolean(DISPLAY_INDIVIDUALS, b);
+    }
+    
+    public static boolean getDefaultDisplayDatatypes() {
+    	return getPreferences().getBoolean(DISPLAY_DATATYPES, defaultDisplayDatatypes);
+    }
+    
+    public static void setDefaultDisplayDatatypes(boolean b) {
+    	getPreferences().putBoolean(DISPLAY_DATATYPES, b);
+    }
 
     public static QueryType getDefaultQueryType() {
         String type = getPreferences().getString(QUERY_TYPE, defaultQueryType.getName());
+        return QueryType.valueOf(type);
+    }
+    
+    public static QueryType getDefaultFilterQueryType() {
+        String type = getPreferences().getString(FILTER_QUERY_TYPE, defaultFilterQueryType.getName());
         return QueryType.valueOf(type);
     }
 
@@ -61,5 +110,10 @@ public class TabPreferences {
     public static void setDefaultQueryType(QueryType queryType) {
         checkNotNull(queryType);
         getPreferences().putString(QUERY_TYPE, queryType.getName());
+    }
+    
+    public static void setDefaultFilterQueryType(QueryType queryType) {
+        checkNotNull(queryType);
+        getPreferences().putString(FILTER_QUERY_TYPE, queryType.getName());
     }
 }

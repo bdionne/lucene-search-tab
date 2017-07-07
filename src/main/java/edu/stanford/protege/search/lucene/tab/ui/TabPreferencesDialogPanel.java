@@ -26,9 +26,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class TabPreferencesDialogPanel extends JPanel implements VerifiedInputEditor {
     private static final long serialVersionUID = -5267362633380833037L;
     private List<InputVerificationStatusChangedListener> listeners = new ArrayList<>();
-    private JLabel propertyLbl, queryTypeLbl, maxResultsLbl;
+    private JCheckBox classes, properties, individuals, datatypes;
+    private JLabel propertyLbl, queryTypeLbl, filterQueryTypeLbl, entitiesToDisplay, maxResultsLbl;
     private OwlEntityComboBox propertyComboBox;
     private JComboBox<QueryType> queryTypes;
+    private JComboBox<QueryType> filterQueryTypes;
     private JFormattedTextField maxResultsField;
     private JSpinner maxResults;
     private OWLEditorKit editorKit;
@@ -46,9 +48,16 @@ public class TabPreferencesDialogPanel extends JPanel implements VerifiedInputEd
 
     private void initUi() {
         setLayout(new GridBagLayout());
+        
+        classes = new JCheckBox("Classes");
+        properties = new JCheckBox("Properties");
+        individuals = new JCheckBox("Individuals");
+        datatypes = new JCheckBox("Datatypes");
 
         propertyLbl = new JLabel("Default OWL property");
         queryTypeLbl = new JLabel("Default query type");
+        filterQueryTypeLbl = new JLabel("Results filter query type");
+        entitiesToDisplay = new JLabel("Entities to display");
         maxResultsLbl = new JLabel("Maximum results per page");
 
         propertyComboBox = new OwlEntityComboBox(editorKit);
@@ -57,6 +66,11 @@ public class TabPreferencesDialogPanel extends JPanel implements VerifiedInputEd
         queryTypes = new JComboBox<>();
         for(QueryType qt : QueryType.QUERY_TYPES) {
             queryTypes.addItem(qt);
+        }
+        
+        filterQueryTypes = new JComboBox<>();
+        for(QueryType qt : QueryType.QUERY_TYPES) {
+            filterQueryTypes.addItem(qt);
         }
 
         maxResults = new JSpinner();
@@ -77,6 +91,15 @@ public class TabPreferencesDialogPanel extends JPanel implements VerifiedInputEd
         add(queryTypeLbl, new GridBagConstraints(0, 4, 1, 1, 1.0, 0.0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE, first, 0, 0));
         add(queryTypes, new GridBagConstraints(0, 5, 1, 1, 1.0, 0.0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, second, 0, 0));
 
+        add(filterQueryTypeLbl, new GridBagConstraints(0, 6, 1, 1, 1.0, 0.0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE, first, 0, 0));
+        add(filterQueryTypes, new GridBagConstraints(0, 7, 1, 1, 1.0, 0.0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.HORIZONTAL, second, 0, 0));
+
+        add(entitiesToDisplay, new GridBagConstraints(0, 8, 1, 1, 1.0, 0.0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE, first, 0, 0));
+        add(classes, new GridBagConstraints(0, 9, 1, 1, 1.0, 0.0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE, second, 0, 0));
+        add(properties, new GridBagConstraints(1, 9, 1, 1, 1.0, 0.0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE, second, 0, 0));
+        add(individuals, new GridBagConstraints(2, 9, 1, 1, 1.0, 0.0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE, second, 0, 0));
+        add(datatypes, new GridBagConstraints(3, 9, 1, 1, 1.0, 0.0, GridBagConstraints.BASELINE_LEADING, GridBagConstraints.NONE, second, 0, 0));
+        
         setDefaultValues();
     }
 
@@ -102,6 +125,11 @@ public class TabPreferencesDialogPanel extends JPanel implements VerifiedInputEd
         OWLProperty defaultProperty = TabPreferences.getDefaultProperty(editorKit);
         propertyComboBox.setSelectedItem(defaultProperty);
         queryTypes.setSelectedItem(TabPreferences.getDefaultQueryType());
+        filterQueryTypes.setSelectedItem(TabPreferences.getDefaultFilterQueryType());
+        classes.setSelected(TabPreferences.getDefaultDisplayClasses());
+        properties.setSelected(TabPreferences.getDefaultDisplayProperties());
+        individuals.setSelected(TabPreferences.getDefaultDisplayIndividuals());
+        datatypes.setSelected(TabPreferences.getDefaultDisplayDatatypes());
     }
 
     private void updatePreferences() {
@@ -110,8 +138,16 @@ public class TabPreferencesDialogPanel extends JPanel implements VerifiedInputEd
 
         QueryType qt = (QueryType) queryTypes.getSelectedItem();
         TabPreferences.setDefaultQueryType(qt);
+        
+        QueryType fqt = (QueryType) filterQueryTypes.getSelectedItem();
+        TabPreferences.setDefaultFilterQueryType(fqt);
 
         TabPreferences.setMaximumResultsPerPage(((SpinnerNumberModel) maxResults.getModel()).getNumber().intValue());
+        
+        TabPreferences.setDefaultDisplayClasses(classes.isSelected());
+        TabPreferences.setDefaultDisplayProperties(properties.isSelected());
+        TabPreferences.setDefaultDisplayIndividuals(individuals.isSelected());
+        TabPreferences.setDefaultDisplayDatatypes(datatypes.isSelected());
     }
 
     public static void showDialog(OWLEditorKit editorKit) {

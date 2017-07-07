@@ -7,8 +7,11 @@ import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.search.lucene.LuceneSearcher;
 import org.protege.editor.search.lucene.SearchContext;
 import edu.stanford.protege.search.lucene.tab.engine.*;
+
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLProperty;
+import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -18,6 +21,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -37,8 +41,8 @@ public class QueryEditorPanel extends JPanel implements Disposable {
     private JPanel queriesPanel;
     private OWLEditorKit editorKit;
     
-    private String queryInput = "";
-    private QueryType basicQueryType = null;
+    private FilteredQuery currentQuery = null;
+    
 
     /**
      * Constructor
@@ -144,11 +148,11 @@ public class QueryEditorPanel extends JPanel implements Disposable {
         }
         MatchCriteria match = getMatchCriteria();
         boolean isMatchAll = (match == MatchCriteria.MATCH_ALL);
-        FilteredQuery userQuery = builder.build(isMatchAll);
-        if(userQuery != null) {
+        currentQuery = builder.build(isMatchAll);
+        if(currentQuery != null) {
             searchBtn.setVisible(false);
             stopBtn.setVisible(true);
-            searchManager.performSearch(userQuery, searchResults -> handleResults(userQuery, searchResults));
+            searchManager.performSearch(currentQuery, searchResults -> handleResults(currentQuery, searchResults));
         }
         if(emptyQueries) {
             JOptionPane.showMessageDialog(editorKit.getOWLWorkspace(),
@@ -179,10 +183,42 @@ public class QueryEditorPanel extends JPanel implements Disposable {
     private void handleResults(FilteredQuery query, Collection<OWLEntity> results) {
         LuceneQueryPanel queryPanel = getLuceneQueryPanel();
         if(queryPanel != null) {
-            queryPanel.getResultsPanel().setResults(query, results, queryInput, basicQueryType);
-            stopBtn.setVisible(false);
-            searchBtn.setVisible(true);
+        	boolean clearTxt = query.equals(currentQuery);
+        	queryPanel.getResultsPanel().setResults(query, results, clearTxt);
+        	stopBtn.setVisible(false);
+        	searchBtn.setVisible(true);
         }
+    }
+    
+    public void filterQuery(String filterString) {
+    	FilteredQuery.Builder builder = new FilteredQuery.Builder();
+    	BasicQuery.Factory queryFactory = new BasicQuery.Factory(new SearchContext(editorKit), getSearchManager());
+    	boolean isMatchAll = currentQuery.isMatchAll();
+    	List<SearchTabQuery> filters = currentQuery.getFilters();
+    	for (SearchTabQuery q : filters) {
+    		builder.add(q);
+    	}
+    	
+    	IRI rdfsl = OWLRDFVocabulary.RDFS_LABEL.getIRI();
+    	
+    	Set<OWLEntity> ents = editorKit.getOWLModelManager().getActiveOntology().getEntitiesInSignature(rdfsl);
+    	OWLProperty prop = null;
+    	for (OWLEntity ent : ents) {
+    		prop = (OWLProperty) ent;
+    		break;
+    	}
+    	
+    	
+    	
+    	QueryType typ = TabPreferences.getDefaultFilterQueryType();
+    	
+    	builder.add(queryFactory.createQuery(prop, typ, filterString));
+    	
+    	FilteredQuery nfq = builder.build(isMatchAll); 
+    	
+    	
+    	// modify original query to filter further
+    	getSearchManager().performSearch(nfq, searchResults -> handleResults(nfq, searchResults));
     }
 
     private LuceneQueryPanel getLuceneQueryPanel() {
