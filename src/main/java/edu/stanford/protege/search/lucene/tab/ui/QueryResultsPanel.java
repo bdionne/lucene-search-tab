@@ -465,16 +465,6 @@ public class QueryResultsPanel extends JPanel implements Disposable {
         
         categoriseEntityTypes();
         initialFilterEntityTypes();
-        /**
-        if (type != null) {
-        	if (type.equals(QueryType.EXACT_MATCH_STRING)) {
-        		filterTextField(true, true);
-        		
-        	} else if (type.equals(QueryType.STARTS_WITH_STRING)) {
-        		filterTextField(true, false);        		
-        	}       	
-        }
-        **/
         
     }
     
