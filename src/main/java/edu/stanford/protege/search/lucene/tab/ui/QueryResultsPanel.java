@@ -197,7 +197,8 @@ public class QueryResultsPanel extends JPanel implements Disposable {
             backBtn.setEnabled(false);
         }
         updatePageLabel();
-        setListData(pagedResultsList.get(currentPage), false);
+        List<OWLEntity> page = pagedResultsList.get(currentPage);
+        results.setListData(page.toArray(new OWLEntity[page.size()]));
     };
 
     private ActionListener forwardBtnListener = e -> {
@@ -209,7 +210,8 @@ public class QueryResultsPanel extends JPanel implements Disposable {
             forwardBtn.setEnabled(false);
         }
         updatePageLabel();
-        setListData(pagedResultsList.get(currentPage), false);
+        List<OWLEntity> page = pagedResultsList.get(currentPage);
+        results.setListData(page.toArray(new OWLEntity[page.size()]));
     };
 
     private void updatePageLabel() {
