@@ -20,3 +20,6 @@ build/
 
 # OSX
 .DS_Store
+
+foo
+*foo.java

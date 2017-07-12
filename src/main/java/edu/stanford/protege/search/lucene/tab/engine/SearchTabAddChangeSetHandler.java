@@ -11,6 +11,8 @@ import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.AxiomSubjectProvider;
 import org.semanticweb.owlapi.vocab.XSDVocabulary;
 
+import edu.stanford.protege.search.lucene.tab.ui.LuceneUiUtils;
+
 import java.util.Set;
 
 public class SearchTabAddChangeSetHandler extends AddChangeSetHandler implements OWLAxiomVisitor {
@@ -45,7 +47,7 @@ public class SearchTabAddChangeSetHandler extends AddChangeSetHandler implements
             doc.add(new StringField(IndexField.ANNOTATION_IRI, getIri(axiom.getProperty()), Store.YES));
             doc.add(new TextField(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(axiom.getProperty()), Store.YES));
             OWLAnnotationValue value = axiom.getAnnotation().getValue();
-            addPropValToDoc(doc, value);
+            LuceneUiUtils.addPropValToDoc(doc, value);
             documents.add(doc);
             
             for (OWLAnnotation ann : axiom.getAnnotations()) {
@@ -57,7 +59,7 @@ public class SearchTabAddChangeSetHandler extends AddChangeSetHandler implements
                 doc.add(new TextField(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(ann.getProperty()), Store.YES));
                
                 value = ann.getValue();
-                addPropValToDoc(doc, value);
+                LuceneUiUtils.addPropValToDoc(doc, value);
                 
                 
                 documents.add(doc);
@@ -66,26 +68,7 @@ public class SearchTabAddChangeSetHandler extends AddChangeSetHandler implements
         }
     }
     
-    private Document addPropValToDoc(Document doc, OWLAnnotationValue value) {
-    	if (value instanceof OWLLiteral) {
-            OWLLiteral literal = (OWLLiteral) value;
-            if (literal.getDatatype().getIRI().equals(XSDVocabulary.ANY_URI.getIRI())) {
-                doc.add(new StringField(IndexField.ANNOTATION_VALUE_IRI, literal.getLiteral(), Store.YES));
-            }
-            else {
-            	String s = literal.getLiteral();
-            	
-                doc.add(new TextField(IndexField.ANNOTATION_TEXT, strip(s), Store.YES));
-                doc.add(new StringField(IndexField.ANNOTATION_FULL_TEXT, 
-                		s.toLowerCase().trim(), Store.YES));
-            }
-        }
-        else if (value instanceof IRI) {
-            IRI iri = (IRI) value;
-            doc.add(new StringField(IndexField.ANNOTATION_VALUE_IRI, iri.toString(), Store.YES));
-        }
-    	return doc;
-    }
+    
 
     @Override
     public void visit(OWLSubClassOfAxiom axiom) {
@@ -218,11 +201,4 @@ public class SearchTabAddChangeSetHandler extends AddChangeSetHandler implements
         // NO-OP
     }
 
-    private String strip(String s) {
-        return s.replaceAll("\\^\\^.*$", "") // remove datatype ending
-                .replaceAll("^\"|\"$", "") // remove enclosed quotes
-                .replaceAll("<[^>]+>", " ") // trim XML tags
-                .replaceAll("\\s+", " ") // trim excessive white spaces
-                .trim();
-    }
 }

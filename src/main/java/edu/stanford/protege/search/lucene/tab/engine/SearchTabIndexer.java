@@ -72,6 +72,8 @@ import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.util.AxiomSubjectProvider;
 import org.semanticweb.owlapi.vocab.XSDVocabulary;
 
+import edu.stanford.protege.search.lucene.tab.ui.LuceneUiUtils;
+
 /**
  * Author: Josef Hardi <josef.hardi@stanford.edu><br>
  * Stanford University<br>
@@ -167,7 +169,7 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
                     doc.add(new TextField(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(axiom.getProperty()), Store.YES));
                     OWLAnnotationValue value = axiom.getAnnotation().getValue();
                     
-                    doc = addPropValToDoc(doc, value);
+                    doc = LuceneUiUtils.addPropValToDoc(doc, value);
                     
                     documents.add(doc);
                     // add annotations on annotations
@@ -180,7 +182,7 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
                         doc.add(new TextField(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(ann.getProperty()), Store.YES));
                        
                         value = ann.getValue();
-                        doc = addPropValToDoc(doc, value);
+                        doc = LuceneUiUtils.addPropValToDoc(doc, value);
                         
                         documents.add(doc);
                     	
@@ -188,30 +190,7 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
                 }
             }
             
-            private Document addPropValToDoc(Document doc, OWLAnnotationValue value) {
-            	if (value instanceof OWLLiteral) {
-                    OWLLiteral literal = (OWLLiteral) value;
-                    if (literal.getDatatype().getIRI().equals(XSDVocabulary.ANY_URI.getIRI())) {
-                        doc.add(new StringField(IndexField.ANNOTATION_VALUE_IRI, literal.getLiteral(), Store.YES));
-                    }
-                    else {
-                    	String s = literal.getLiteral();
-                    	
-                    	if (s.startsWith("PAX3")) {
-                    		System.out.println(s);
-                    	}
-                    	
-                        doc.add(new TextField(IndexField.ANNOTATION_TEXT, strip(s), Store.YES));
-                        doc.add(new StringField(IndexField.ANNOTATION_FULL_TEXT, 
-                        		s.trim().toLowerCase(), Store.YES));
-                    }
-                }
-                else if (value instanceof IRI) {
-                    IRI iri = (IRI) value;
-                    doc.add(new StringField(IndexField.ANNOTATION_VALUE_IRI, iri.toString(), Store.YES));
-                }
-            	return doc;
-            }
+            
 
             @Override
             public void visit(OWLSubClassOfAxiom axiom) {
@@ -358,14 +337,7 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
                 return objectRenderer.getRendering(object);
             }
 
-            private String strip(String s) {
-                return s.replaceAll("\\^\\^.*$", "") // remove datatype ending
-                        .replaceAll("^\"|\"$", "") // remove enclosed quotes
-                        .replaceAll("<[^>]+>", " ") // trim XML tags
-                        .replaceAll("\\s+", " ") // trim excessive white spaces
-                        .replaceAll("\\p{P}", "") // remove punctuation
-                        .trim();
-            }
+            
         };
     }
 }

@@ -245,17 +245,7 @@ public abstract class BasicQuery implements SearchTabQuery {
         private static BooleanQuery createExactMatchFullQuery(OWLProperty property, String searchString, Analyzer anal) {
             
         	BooleanQuery.Builder builder = new BooleanQuery.Builder();
-            builder.add(LuceneUtils.createTermQuery(IndexField.ANNOTATION_IRI, property.getIRI().toString()), Occur.MUST);
-            /**
-            QueryParser parser = new QueryParser(IndexField.ANNOTATION_FULL_TEXT, anal);
-            try {
-				Query q = parser.parse(searchString);
-				builder.add(q, Occur.MUST);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			**/
+            builder.add(LuceneUtils.createTermQuery(IndexField.ANNOTATION_IRI, property.getIRI().toString()), Occur.MUST);           
             builder.add(LuceneUtils.createTermQuery(IndexField.ANNOTATION_FULL_TEXT, searchString), Occur.MUST);
             return builder.build();
             

@@ -1,13 +1,21 @@
 package edu.stanford.protege.search.lucene.tab.ui;
 
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.document.Field.Store;
 import org.imgscalr.Scalr;
 import org.protege.editor.core.ui.error.ErrorLogPanel;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.renderer.OWLModelManagerEntityRenderer;
+import org.protege.editor.search.lucene.IndexField;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotationValue;
 import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLProperty;
+import org.semanticweb.owlapi.vocab.XSDVocabulary;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -98,5 +106,34 @@ public class LuceneUiUtils {
     		return s.substring(1, s.length() - 1);
     	}
     	return s;
+    }
+    
+    public static Document addPropValToDoc(Document doc, OWLAnnotationValue value) {
+    	if (value instanceof OWLLiteral) {
+            OWLLiteral literal = (OWLLiteral) value;
+            if (literal.getDatatype().getIRI().equals(XSDVocabulary.ANY_URI.getIRI())) {
+                doc.add(new StringField(IndexField.ANNOTATION_VALUE_IRI, literal.getLiteral(), Store.YES));
+            }
+            else {
+            	String s = literal.getLiteral();
+                doc.add(new TextField(IndexField.ANNOTATION_TEXT, strip(s), Store.YES));
+                doc.add(new StringField(IndexField.ANNOTATION_FULL_TEXT, 
+                		s.trim().toLowerCase(), Store.YES));
+            }
+        }
+        else if (value instanceof IRI) {
+            IRI iri = (IRI) value;
+            doc.add(new StringField(IndexField.ANNOTATION_VALUE_IRI, iri.toString(), Store.YES));
+        }
+    	return doc;
+    }
+    
+    private static String strip(String s) {
+        return s.replaceAll("\\^\\^.*$", "") // remove datatype ending
+                .replaceAll("^\"|\"$", "") // remove enclosed quotes
+                .replaceAll("<[^>]+>", " ") // trim XML tags
+                .replaceAll("\\s+", " ") // trim excessive white spaces
+                .replaceAll("\\p{P}", "") // remove punctuation
+                .trim();
     }
 }
