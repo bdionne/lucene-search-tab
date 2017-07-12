@@ -4,4 +4,4 @@ A plug-in for Protégé 5 that provides a user interface for formulating and exe
 * [Lucene search engine](https://github.com/protegeproject/lucene-search-plugin)
 * [CSV export plugin](https://github.com/protegeproject/csv-export-plugin)
 
-NOTE: This readme needs updating
+NOTE: This readme needs updating, a lot
