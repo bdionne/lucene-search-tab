@@ -7,6 +7,7 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.find.OWLEntityFinder;
@@ -95,11 +96,11 @@ public abstract class BasicQuery implements SearchTabQuery {
             }
             else if (QueryType.FullStringQueryTypes.contains(type)) {
             	if (type.equals(QueryType.STARTS_WITH_STRING)) {
-                    BasicQuery bq = createStartsWithFullFilter(property, toLowerCase(searchString));
+                    BasicQuery bq = createStartsWithFullFilter(property, toLowerCase(rawSearchString));
                     return bq;
                 }            	
             	else if (type.equals(QueryType.EXACT_MATCH_STRING)) {
-                    BasicQuery bq = createExactMatchFullFilter(property, toLowerCase(searchString));
+                    BasicQuery bq = createExactMatchFullFilter(property, toLowerCase(rawSearchString));
                     return bq;
                 }                
             }
@@ -242,10 +243,22 @@ public abstract class BasicQuery implements SearchTabQuery {
         }
         
         private static BooleanQuery createExactMatchFullQuery(OWLProperty property, String searchString, Analyzer anal) {
-            BooleanQuery.Builder builder = new BooleanQuery.Builder();
+            
+        	BooleanQuery.Builder builder = new BooleanQuery.Builder();
             builder.add(LuceneUtils.createTermQuery(IndexField.ANNOTATION_IRI, property.getIRI().toString()), Occur.MUST);
+            /**
+            QueryParser parser = new QueryParser(IndexField.ANNOTATION_FULL_TEXT, anal);
+            try {
+				Query q = parser.parse(searchString);
+				builder.add(q, Occur.MUST);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			**/
             builder.add(LuceneUtils.createTermQuery(IndexField.ANNOTATION_FULL_TEXT, searchString), Occur.MUST);
             return builder.build();
+            
         }
 
 
