@@ -98,25 +98,29 @@ public class IndexRecordTable extends JTable {
         @Override
         public Object getValueAt(int row, int column) {
             List<String> indexRecord = indexRecordTable.get(row);
-            String ontologyIri = indexRecord.get(1);
-            String directoryLocation = indexRecord.get(2);
-            switch (column) {
-                case 0: // "Ontology IRI"
-                    return ontologyIri;
-                case 1: // "Index directory location"
-                    if (!new File(directoryLocation).exists()) {
-                        return "(directory not found)";
-                    }
-                    return directoryLocation;
-                case 2: // "Last modified"
-                    if (!new File(directoryLocation).exists()) {
-                        return "N/A";
-                    }
-                    File indexDirectory = new File(directoryLocation);
-                    Date now = new Date();
-                    return TimeUnit.MILLISECONDS.toDays(now.getTime() - indexDirectory.lastModified()) + " days ago";
-                default:
-                    return "";
+            if (!indexRecord.isEmpty()) {
+            	String ontologyIri = indexRecord.get(1);
+            	String directoryLocation = indexRecord.get(2);
+            	switch (column) {
+            	case 0: // "Ontology IRI"
+            		return ontologyIri;
+            	case 1: // "Index directory location"
+            		if (!new File(directoryLocation).exists()) {
+            			return "(directory not found)";
+            		}
+            		return directoryLocation;
+            	case 2: // "Last modified"
+            		if (!new File(directoryLocation).exists()) {
+            			return "N/A";
+            		}
+            		File indexDirectory = new File(directoryLocation);
+            		Date now = new Date();
+            		return TimeUnit.MILLISECONDS.toDays(now.getTime() - indexDirectory.lastModified()) + " days ago";
+            	default:
+            		return "";
+            	}
+            } else {
+            	return "";
             }
         }
     }
