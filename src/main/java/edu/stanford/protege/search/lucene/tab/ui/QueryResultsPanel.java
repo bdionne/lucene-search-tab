@@ -344,7 +344,6 @@ public class QueryResultsPanel extends JPanel implements Disposable {
         if(!isSelected) {
             entityTypesFilteredResults.removeAll(bucket);
         }
-        Collections.sort(entityTypesFilteredResults);
         setListData(entityTypesFilteredResults, true);
     }
 
