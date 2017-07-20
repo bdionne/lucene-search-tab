@@ -104,7 +104,7 @@ public class CsvExporter {
                     row += getPropertyValues(e, property);
                 }
             }
-            rows.add(row.trim());
+            rows.add(row.substring(0, row.lastIndexOf(fileDelimiter)));
         }
         if(includeHeaders) {
             rows.add(0, header);
@@ -134,7 +134,7 @@ public class CsvExporter {
                 header += getRendering(property) + fileDelimiter;
             }
         }
-        return header;
+        return header.substring(0, header.lastIndexOf(fileDelimiter));
     }
 
     private String getPropertyValues(OWLEntity entity, OWLEntity property) {
