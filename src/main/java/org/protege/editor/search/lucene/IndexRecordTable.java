@@ -98,7 +98,7 @@ public class IndexRecordTable extends JTable {
         @Override
         public Object getValueAt(int row, int column) {
             List<String> indexRecord = indexRecordTable.get(row);
-            if (!indexRecord.isEmpty()) {
+            if (!indexRecord.isEmpty() && indexRecord.size() >= 3) {
             	String ontologyIri = indexRecord.get(1);
             	String directoryLocation = indexRecord.get(2);
             	switch (column) {
