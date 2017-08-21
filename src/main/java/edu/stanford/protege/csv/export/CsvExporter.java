@@ -171,6 +171,7 @@ public class CsvExporter {
             if(ax.getProperty().equals(property)) {
             	String next_val = "";
                 OWLAnnotationValue annValue = ax.getValue();
+                /**
                 if(annValue instanceof IRI) {
                     next_val = annValue.toString();
                 } else if(annValue instanceof OWLLiteral) {
@@ -180,6 +181,8 @@ public class CsvExporter {
                 } else if(annValue instanceof OWLAnonymousIndividual) {
                     next_val = "AnonymousIndividual-" + ((OWLAnonymousIndividual)annValue).getID().getID();
                 }
+                **/
+                next_val = getRendering(annValue);
                 // now check if user selected annotations on this annotation
                 List<OWLEntity> deps = dependentAnnotations.get(property); 
                 if (deps != null) {
