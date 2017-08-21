@@ -170,18 +170,7 @@ public class CsvExporter {
         for(OWLAnnotationAssertionAxiom ax : axioms) {
             if(ax.getProperty().equals(property)) {
             	String next_val = "";
-                OWLAnnotationValue annValue = ax.getValue();
-                /**
-                if(annValue instanceof IRI) {
-                    next_val = annValue.toString();
-                } else if(annValue instanceof OWLLiteral) {
-                    String literalStr = ((OWLLiteral) annValue).getLiteral();
-                    literalStr = literalStr.replaceAll("\"", "'");
-                    next_val = literalStr;
-                } else if(annValue instanceof OWLAnonymousIndividual) {
-                    next_val = "AnonymousIndividual-" + ((OWLAnonymousIndividual)annValue).getID().getID();
-                }
-                **/
+                OWLAnnotationValue annValue = ax.getValue();                
                 next_val = getRendering(annValue);
                 // now check if user selected annotations on this annotation
                 List<OWLEntity> deps = dependentAnnotations.get(property); 
