@@ -47,7 +47,10 @@ public class SearchContext {
         return editorKit.getOWLModelManager().getActiveOntologies();
     }
 
-    public boolean isIndexable() {
-        return !getActiveOntology().isEmpty() && !getActiveOntology().isAnonymous();
-    }
+	public boolean isIndexable() {
+		if (getActiveOntology() != null) {
+			return !getActiveOntology().isEmpty() && !getActiveOntology().isAnonymous();
+		}
+		return false;
+	}
 }

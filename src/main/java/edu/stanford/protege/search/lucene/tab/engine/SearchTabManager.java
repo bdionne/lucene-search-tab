@@ -81,6 +81,7 @@ public class SearchTabManager extends LuceneSearcher {
         editorKit.getOWLModelManager().addListener(ontologyChangedListener);
         editorKit.getOWLModelManager().addOntologyChangeListener(updateIndexListener);
         initSearchContext();
+        initIndex();
     }
 
     private void handleModelManagerEvent(OWLModelManagerChangeEvent event) {
