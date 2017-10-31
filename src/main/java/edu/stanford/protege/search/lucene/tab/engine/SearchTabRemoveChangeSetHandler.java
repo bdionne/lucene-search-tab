@@ -1,5 +1,9 @@
 package edu.stanford.protege.search.lucene.tab.engine;
 
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.index.Term;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.search.lucene.IndexField;
@@ -7,6 +11,8 @@ import org.protege.editor.search.lucene.RemoveChangeSetHandler;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.AxiomSubjectProvider;
 import org.semanticweb.owlapi.vocab.XSDVocabulary;
+
+import edu.stanford.protege.search.lucene.tab.ui.LuceneUiUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +45,9 @@ public class SearchTabRemoveChangeSetHandler extends RemoveChangeSetHandler impl
             List<Term> terms = new ArrayList<>();
             OWLEntity entity = getOWLEntity((IRI) axiom.getSubject());
             terms.add(new Term(IndexField.ENTITY_IRI, getIri(entity)));
+            terms.add(new Term(IndexField.DISPLAY_NAME, getDisplayName(entity)));
             terms.add(new Term(IndexField.ANNOTATION_IRI, getIri(axiom.getProperty())));
+            terms.add(new Term(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(axiom.getProperty())));
             OWLAnnotationValue value = axiom.getAnnotation().getValue();
             if (value instanceof OWLLiteral) {
                 OWLLiteral literal = (OWLLiteral) value;
@@ -48,6 +56,8 @@ public class SearchTabRemoveChangeSetHandler extends RemoveChangeSetHandler impl
                 }
                 else {
                     terms.add(new Term(IndexField.ANNOTATION_TEXT, strip(literal.getLiteral())));
+                    terms.add(new Term(IndexField.ANNOTATION_FULL_TEXT, 
+                    		literal.getLiteral().trim().toLowerCase()));
                 }
             }
             else if (value instanceof IRI) {
@@ -55,6 +65,35 @@ public class SearchTabRemoveChangeSetHandler extends RemoveChangeSetHandler impl
                 terms.add(new Term(IndexField.ANNOTATION_VALUE_IRI, iri.toString()));
             }
             removeFilters.add(terms);
+            
+            for (OWLAnnotation ann : axiom.getAnnotations()) {
+            	
+            	terms = new ArrayList<>();
+            	terms.add(new Term(IndexField.ENTITY_IRI, getIri(entity)));
+                terms.add(new Term(IndexField.DISPLAY_NAME, getDisplayName(entity)));
+                
+                terms.add(new Term(IndexField.ANNOTATION_IRI, getIri(ann.getProperty())));
+                terms.add(new Term(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(ann.getProperty())));
+               
+                value = ann.getValue();
+                if (value instanceof OWLLiteral) {
+                    OWLLiteral literal = (OWLLiteral) value;
+                    if (literal.getDatatype().getIRI().equals(XSDVocabulary.ANY_URI.getIRI())) {
+                        terms.add(new Term(IndexField.ANNOTATION_VALUE_IRI, literal.getLiteral()));
+                    }
+                    else {
+                        terms.add(new Term(IndexField.ANNOTATION_TEXT, strip(literal.getLiteral())));
+                        terms.add(new Term(IndexField.ANNOTATION_FULL_TEXT, 
+                        		literal.getLiteral().trim().toLowerCase()));
+                    }
+                }
+                else if (value instanceof IRI) {
+                    IRI iri = (IRI) value;
+                    terms.add(new Term(IndexField.ANNOTATION_VALUE_IRI, iri.toString()));
+                }
+                removeFilters.add(terms);
+            	
+            }
         }
     }
 
