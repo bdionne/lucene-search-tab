@@ -43,20 +43,20 @@ public class SearchTabAddChangeSetHandler extends AddChangeSetHandler implements
             Document doc = new Document();
             OWLEntity entity = getOWLEntity((IRI) axiom.getSubject());
             doc.add(new StringField(IndexField.ENTITY_IRI, getIri(entity), Store.YES));
-            doc.add(new TextField(IndexField.DISPLAY_NAME, getDisplayName(entity), Store.YES));
+            //doc.add(new TextField(IndexField.DISPLAY_NAME, getDisplayName(entity), Store.YES));
             doc.add(new StringField(IndexField.ANNOTATION_IRI, getIri(axiom.getProperty()), Store.YES));
-            doc.add(new TextField(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(axiom.getProperty()), Store.YES));
+            //doc.add(new TextField(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(axiom.getProperty()), Store.YES));
             OWLAnnotationValue value = axiom.getAnnotation().getValue();
             LuceneUiUtils.addPropValToDoc(doc, value);
             documents.add(doc);
             
             for (OWLAnnotation ann : axiom.getAnnotations()) {
             	doc = new Document();
-            	doc.add(new TextField(IndexField.ENTITY_IRI, getIri(entity), Store.YES));
-                doc.add(new TextField(IndexField.DISPLAY_NAME, getDisplayName(entity), Store.YES));
+            	doc.add(new StringField(IndexField.ENTITY_IRI, getIri(entity), Store.YES));
+                //doc.add(new TextField(IndexField.DISPLAY_NAME, getDisplayName(entity), Store.YES));
                 
                 doc.add(new StringField(IndexField.ANNOTATION_IRI, getIri(ann.getProperty()), Store.YES));
-                doc.add(new TextField(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(ann.getProperty()), Store.YES));
+                //doc.add(new TextField(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(ann.getProperty()), Store.YES));
                
                 value = ann.getValue();
                 LuceneUiUtils.addPropValToDoc(doc, value);

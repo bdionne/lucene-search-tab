@@ -164,9 +164,9 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
                     Document doc = new Document();
                     OWLEntity entity = getOWLEntity((IRI) axiom.getSubject());
                     doc.add(new StringField(IndexField.ENTITY_IRI, getEntityId(entity), Store.YES));
-                    doc.add(new TextField(IndexField.DISPLAY_NAME, getDisplayName(entity), Store.YES));
+                    //doc.add(new TextField(IndexField.DISPLAY_NAME, getDisplayName(entity), Store.YES));
                     doc.add(new StringField(IndexField.ANNOTATION_IRI, getEntityId(axiom.getProperty()), Store.YES));
-                    doc.add(new TextField(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(axiom.getProperty()), Store.YES));
+                    //doc.add(new StringField(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(axiom.getProperty()), Store.YES));
                     OWLAnnotationValue value = axiom.getAnnotation().getValue();
                     
                     doc = LuceneUiUtils.addPropValToDoc(doc, value);
@@ -176,10 +176,10 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
                     for (OWLAnnotation ann : axiom.getAnnotations()) {
                     	doc = new Document();
                     	doc.add(new StringField(IndexField.ENTITY_IRI, getEntityId(entity), Store.YES));
-                        doc.add(new TextField(IndexField.DISPLAY_NAME, getDisplayName(entity), Store.YES));
+                        //doc.add(new TextField(IndexField.DISPLAY_NAME, getDisplayName(entity), Store.YES));
                         
                         doc.add(new StringField(IndexField.ANNOTATION_IRI, getEntityId(ann.getProperty()), Store.YES));
-                        doc.add(new TextField(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(ann.getProperty()), Store.YES));
+                        //doc.add(new TextField(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(ann.getProperty()), Store.YES));
                        
                         value = ann.getValue();
                         doc = LuceneUiUtils.addPropValToDoc(doc, value);

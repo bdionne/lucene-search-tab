@@ -45,9 +45,11 @@ public class SearchTabRemoveChangeSetHandler extends RemoveChangeSetHandler impl
             List<Term> terms = new ArrayList<>();
             OWLEntity entity = getOWLEntity((IRI) axiom.getSubject());
             terms.add(new Term(IndexField.ENTITY_IRI, getIri(entity)));
-            terms.add(new Term(IndexField.DISPLAY_NAME, getDisplayName(entity)));
+            //terms.add(new Term(IndexField.DISPLAY_NAME, getDisplayName(entity)));
             terms.add(new Term(IndexField.ANNOTATION_IRI, getIri(axiom.getProperty())));
-            terms.add(new Term(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(axiom.getProperty())));
+            //terms.add(new Term(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(axiom.getProperty())));
+            
+            
             OWLAnnotationValue value = axiom.getAnnotation().getValue();
             if (value instanceof OWLLiteral) {
                 OWLLiteral literal = (OWLLiteral) value;
@@ -64,16 +66,17 @@ public class SearchTabRemoveChangeSetHandler extends RemoveChangeSetHandler impl
                 IRI iri = (IRI) value;
                 terms.add(new Term(IndexField.ANNOTATION_VALUE_IRI, iri.toString()));
             }
+            
             removeFilters.add(terms);
             
             for (OWLAnnotation ann : axiom.getAnnotations()) {
             	
             	terms = new ArrayList<>();
             	terms.add(new Term(IndexField.ENTITY_IRI, getIri(entity)));
-                terms.add(new Term(IndexField.DISPLAY_NAME, getDisplayName(entity)));
+                //terms.add(new Term(IndexField.DISPLAY_NAME, getDisplayName(entity)));
                 
                 terms.add(new Term(IndexField.ANNOTATION_IRI, getIri(ann.getProperty())));
-                terms.add(new Term(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(ann.getProperty())));
+                //terms.add(new Term(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(ann.getProperty())));
                
                 value = ann.getValue();
                 if (value instanceof OWLLiteral) {
@@ -94,6 +97,7 @@ public class SearchTabRemoveChangeSetHandler extends RemoveChangeSetHandler impl
                 removeFilters.add(terms);
             	
             }
+            
         }
     }
 
