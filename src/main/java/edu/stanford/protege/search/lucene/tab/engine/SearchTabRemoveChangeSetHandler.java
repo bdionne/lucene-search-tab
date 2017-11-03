@@ -226,10 +226,11 @@ public class SearchTabRemoveChangeSetHandler extends RemoveChangeSetHandler impl
     }
 
     private String strip(String s) {
-        return s.replaceAll("\\^\\^.*$", "") // remove datatype ending
+    	return s.replaceAll("\\^\\^.*$", "") // remove datatype ending
                 .replaceAll("^\"|\"$", "") // remove enclosed quotes
                 .replaceAll("<[^>]+>", " ") // trim XML tags
                 .replaceAll("\\s+", " ") // trim excessive white spaces
-                .trim();
+                .replaceAll("\\p{P}", "") // remove punctuation
+                .trim();        
     }
 }
