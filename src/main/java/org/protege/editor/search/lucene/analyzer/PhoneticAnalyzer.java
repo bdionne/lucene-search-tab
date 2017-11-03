@@ -11,7 +11,7 @@ import org.apache.lucene.analysis.ngram.NGramTokenFilter;
 import org.apache.lucene.analysis.phonetic.PhoneticFilter;
 import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
-import org.apache.lucene.analysis.util.CharArraySet;
+import org.apache.lucene.analysis.CharArraySet;
 
 /**
  * Author: Josef Hardi <josef.hardi@stanford.edu><br>
