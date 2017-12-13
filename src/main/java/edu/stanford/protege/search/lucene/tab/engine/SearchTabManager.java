@@ -6,6 +6,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.model.OWLWorkspace;
 import org.protege.editor.owl.model.event.EventType;
 import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
@@ -105,6 +106,8 @@ public class SearchTabManager extends LuceneSearcher {
             initIndexRecord();
             initIndexDelegator();
             if (!indexDelegator.indexExists()) {
+            	OWLWorkspace ows = (OWLWorkspace) editorKit.getWorkspace();
+        		ows.setSelectedTab("lucene-search-tab.LuceneQueryTab");
                 service.submit(this::buildingIndex);
             }
         }

@@ -106,6 +106,7 @@ public class QueryResultsPanel extends JPanel implements Disposable {
         searchProgressBar = new JProgressBar();
         searchProgressBar.putClientProperty("JComponent.sizeVariant", "small");
         searchProgressBar.setVisible(false);
+        searchProgressBar.setValue(0);
         visibilityTimer = new Timer(200, e -> searchProgressBar.setVisible(true));
         editorKit.getSearchManager().addProgressMonitor(new ProgressMonitor() {
             @Override
