@@ -48,7 +48,7 @@ public class LuceneIndexPreferences {
     public static final String USE_CUSTOM_DIR = "UseCustomDirectory";
     public static final String USE_IN_MEMORY_STORING = "UseInMemoryStoring";
 
-    public static final String PROTEGE_DIR = ".Protege";
+    public static final String PROTEGE_DIR = ".protege";
 
     public static final String COLLECTOR_DIR = "lucene";
 
@@ -74,9 +74,8 @@ public class LuceneIndexPreferences {
      * @return Returns the user home directory path.
      */
     @Nonnull
-    public static String getUserHomeDirectory() {
-        String homeDir = normalizePathName(System.getProperty("user.home"));
-        return homeDir + fileSystemSeparator + PROTEGE_DIR + fileSystemSeparator + COLLECTOR_DIR;
+    public static String getLuceneBaseDirectory() {
+    	return PROTEGE_DIR + fileSystemSeparator + COLLECTOR_DIR;
     }
 
     public static boolean useTempDirectoryAsBaseDirectory() {
@@ -173,7 +172,7 @@ public class LuceneIndexPreferences {
      */
     @Nonnull
     public static String getBaseDirectory() {
-        return getPreferences().getString(BASE_DIR, getUserHomeDirectory());
+        return getPreferences().getString(BASE_DIR, getLuceneBaseDirectory());
     }
 
     /**

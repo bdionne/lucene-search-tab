@@ -64,7 +64,7 @@ public class SearchPreferencesPanel extends OWLPreferencesPanel {
 
         rbUserHomeDir.addActionListener(e -> {
             LuceneIndexPreferences.setUserHomeDirectoryAsBaseDirectory();
-            txtIndexLocation.setText(LuceneIndexPreferences.getUserHomeDirectory());
+            txtIndexLocation.setText(LuceneIndexPreferences.getLuceneBaseDirectory());
         });
         rbTempDir.addActionListener(e -> {
             LuceneIndexPreferences.setTempDirectoryAsBaseDirectory();
