@@ -57,17 +57,22 @@ public class NegatedQuery extends ComplexQuery {
     @Override
     public Set<OWLEntity> evaluate(SearchProgressListener listener, AtomicBoolean stopSearch) throws QueryEvaluationException {
         Set<OWLEntity> toReturn = new HashSet<>();
+        boolean first = true;
         for (SearchTabQuery filter : filters) {
             if (stopSearch.get()) { // if should stop
                 ResultSetUtils.complement(toReturn, resultSpace);
                 return toReturn;
             }
             Set<OWLEntity> evalResult = filter.evaluate(listener, stopSearch);
+            if (first) {
+            	toReturn = evalResult;
+            	first = false;
+            }
             if (isMatchAll) {
-                ResultSetUtils.intersect(toReturn, evalResult);
+            	toReturn.retainAll(evalResult);
             }
             else { // match any
-                ResultSetUtils.union(toReturn, evalResult);
+            	toReturn.addAll(evalResult);
             }
         }
         ResultSetUtils.complement(toReturn, resultSpace);

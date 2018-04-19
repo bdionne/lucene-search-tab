@@ -115,16 +115,21 @@ public class NestedQuery extends ComplexQuery {
 
     private Set<OWLEntity> evaluateFillerQuery(SearchProgressListener listener, AtomicBoolean stopSearch) throws QueryEvaluationException {
         Set<OWLEntity> toReturn = new HashSet<>();
+        boolean first = true;
         for (SearchTabQuery filter : fillerFilters) {
             if (stopSearch.get()) { // if should stop
                 return toReturn;
             }
             Set<OWLEntity> evalResult = filter.evaluate(listener, stopSearch);
+            if (first) {
+            	toReturn = evalResult;
+            	first = false;
+            }
             if (isMatchAll) {
-                ResultSetUtils.intersect(toReturn, evalResult);
+            	toReturn.retainAll(evalResult);
             }
             else { // match any
-                ResultSetUtils.union(toReturn, evalResult);
+            	toReturn.addAll(evalResult);
             }
         }
         return toReturn;
