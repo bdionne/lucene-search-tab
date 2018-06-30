@@ -327,12 +327,12 @@ public class ExportDialogPanel extends JPanel implements VerifiedInputEditor {
 
     private void addProperty() {
         AddPropertyToExportDialogPanel.showDialog(editorKit, getEntities(propertiesList),
-        		dependentAnnotations).ifPresent(owlEntities -> addEntitiesToList(owlEntities, propertiesList));
+        		dependentAnnotations, null).ifPresent(owlEntities -> addEntitiesToList(owlEntities, propertiesList));
     }
     
     private void addDepProps(OWLEntity ent) {
         AddPropertyToExportDialogPanel.showDialog(editorKit, getEntities(propertiesList),
-        		dependentAnnotations).ifPresent(owlEntities -> addDepProps(owlEntities, ent));
+        		dependentAnnotations, ent).ifPresent(owlEntities -> addDepProps(owlEntities, ent));
     }
 
     private void addDepProps(List<OWLEntity> entities, OWLEntity ent) {

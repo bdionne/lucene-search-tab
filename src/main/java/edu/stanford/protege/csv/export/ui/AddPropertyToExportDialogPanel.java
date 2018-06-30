@@ -4,12 +4,22 @@ import org.protege.editor.core.ui.util.InputVerificationStatusChangedListener;
 import org.protege.editor.core.ui.util.JOptionPaneEx;
 import org.protege.editor.core.ui.util.VerifiedInputEditor;
 import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.client.ClientSession;
+import org.protege.editor.owl.client.LocalHttpClient;
 import org.protege.editor.owl.model.find.OWLEntityFinder;
 import org.protege.editor.owl.ui.renderer.OWLCellRenderer;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
+import org.semanticweb.owlapi.model.OWLAnnotationPropertyRangeAxiom;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLOntology;
+
+import edu.stanford.protege.metaproject.api.Project;
+import edu.stanford.protege.metaproject.api.ProjectOptions;
+import edu.stanford.protege.metaproject.api.exception.UnknownProjectIdException;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -39,6 +49,11 @@ public class AddPropertyToExportDialogPanel extends JPanel implements VerifiedIn
     private List<OWLEntity> selectedProperties, propertiesToExclude;
     private Map<OWLEntity, List<OWLEntity>> depMap;
     private SortedListModel<OWLEntity> listModel = null;
+    public final String COMPLEX_PROPS = "complex_properties";
+    private Set<OWLAnnotationProperty> complexProperties = new HashSet<OWLAnnotationProperty>();
+    private List<OWLEntity> requiredAnnotationPropertyList = new ArrayList<OWLEntity>();
+    private OWLOntology ontology;
+    private OWLEntity entity;
 
     /**
      * Constructor
@@ -52,13 +67,20 @@ public class AddPropertyToExportDialogPanel extends JPanel implements VerifiedIn
     
     public AddPropertyToExportDialogPanel(OWLEditorKit editorKit, List<OWLEntity> propertiesToExclude,
     		Map<OWLEntity, List<OWLEntity>> depMap) {
+        this(editorKit, propertiesToExclude, depMap, null);
+    }
+
+    public AddPropertyToExportDialogPanel(OWLEditorKit editorKit, List<OWLEntity> propertiesToExclude,
+    		Map<OWLEntity, List<OWLEntity>> depMap, OWLEntity entity) {
         this.editorKit = checkNotNull(editorKit);
         listModel = new SortedListModel<>(editorKit);
         this.propertiesToExclude = checkNotNull(propertiesToExclude);
         this.depMap = depMap;
+        this.ontology = editorKit.getModelManager().getActiveOntology();
+        this.entity = entity;
         initUi();
     }
-
+    
     private void initUi() {
         setLayout(new GridBagLayout());
         setupList();
@@ -96,10 +118,19 @@ public class AddPropertyToExportDialogPanel extends JPanel implements VerifiedIn
         propertiesList.setModel(listModel);
         propertiesList.setBorder(new EmptyBorder(2, 2, 0, 2));
         
-        
-       
-
-        allPropertiesList = UiUtils.getProperties(editorKit);
+        //if (propertiesToExclude != null && propertiesToExclude.size() > 0) {
+        if (this.entity != null) {
+	        //OWLEntity propToExclude = propertiesToExclude.get(0);
+	        //if (propToExclude instanceof OWLAnnotationProperty && isComplexProperty((OWLAnnotationProperty) propToExclude)) {	
+        	if (this.entity instanceof OWLAnnotationProperty && isComplexProperty((OWLAnnotationProperty) this.entity)) {
+	        	//allPropertiesList = getRequiredAnnotationList((OWLAnnotationProperty)propToExclude);
+        		allPropertiesList = getRequiredAnnotationList((OWLAnnotationProperty)this.entity);
+	        } else {
+	        	allPropertiesList = UiUtils.getProperties(editorKit);
+	        }
+        }else {
+        	allPropertiesList = UiUtils.getProperties(editorKit);
+        }
         if(!propertiesToExclude.isEmpty()) {
             allPropertiesList.removeAll(propertiesToExclude);
         }
@@ -201,9 +232,9 @@ public class AddPropertyToExportDialogPanel extends JPanel implements VerifiedIn
     }
     
     public static Optional<List<OWLEntity>> showDialog(OWLEditorKit editorKit, List<OWLEntity> propertiesToExlude,
-    		Map<OWLEntity, List<OWLEntity>> depMap) {
+    		Map<OWLEntity, List<OWLEntity>> depMap, OWLEntity ent) {
         AddPropertyToExportDialogPanel panel = new AddPropertyToExportDialogPanel(editorKit, propertiesToExlude,
-        		depMap);
+        		depMap, ent);
         int response = JOptionPaneEx.showValidatingConfirmDialog(
                 editorKit.getOWLWorkspace(), "Choose properties to export", panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null);
         if (response == JOptionPane.OK_OPTION) {
@@ -222,4 +253,137 @@ public class AddPropertyToExportDialogPanel extends JPanel implements VerifiedIn
     public void removeStatusChangedListener(InputVerificationStatusChangedListener listener) {
         listeners.remove(listener);
     }
+    
+    public Set<OWLAnnotationProperty> getComplexProperties() {
+		if (complexProperties.size() == 0) {
+			loadComplexProperties();
+		}
+		return complexProperties;
+	}
+    
+    private void loadComplexProperties() {
+    	ClientSession clientSession = ClientSession.getInstance(editorKit);
+    	LocalHttpClient lhc = (LocalHttpClient) clientSession.getActiveClient();
+		if (lhc != null) {
+			Project project = null;
+			try {
+				project = lhc.getCurrentConfig().getProject(clientSession.getActiveProject());
+			} catch (UnknownProjectIdException e) {
+				e.printStackTrace();
+			}
+
+			if (project != null) {
+				com.google.common.base.Optional<ProjectOptions> options = project.getOptions();
+				
+				Set<String> not_found_props = new HashSet<String>();
+
+				if (options.isPresent()) {
+					ProjectOptions opts = options.get();
+					Set<String> complex_props = opts.getValues(COMPLEX_PROPS);
+					if (complex_props != null) {						
+						for (String cp : complex_props) {
+							OWLAnnotationProperty p = lookUp(cp);
+							if (p != null) {
+								complexProperties.add(p);
+							} else {
+								not_found_props.add(cp);
+							}
+							
+						}
+						if (not_found_props.size() > 0) {
+							String msg = "Missing Properties: \n";
+							for (String prop : not_found_props) {
+								msg += prop + "\n";
+							}
+							JOptionPane.showMessageDialog(this, msg, "Warning", JOptionPane.WARNING_MESSAGE);
+						}
+					}
+				}
+			}
+		}
+    }
+				
+	OWLAnnotationProperty lookUp(String iri) {
+		IRI cpIRI = IRI.create(iri);
+		return lookUpIri(cpIRI);
+	}
+	
+	OWLAnnotationProperty lookUpIri(IRI cpIRI) {
+		Set<OWLAnnotationProperty> annProps = ontology.getAnnotationPropertiesInSignature();
+		for (OWLAnnotationProperty ap : annProps) {
+			if (ap.getIRI().equals(cpIRI)) {
+				IRI dt = getDataType(ap);
+				if (dt != null) {
+					//System.out.println(cpIRI + " it's type: " + dt);
+				} else {
+					//System.out.println(cpIRI);
+
+				}
+				return ap;	
+			}
+		}
+		return null;
+	}
+
+	public IRI getDataType(OWLAnnotationProperty prop) {
+		Set<OWLAnnotationPropertyRangeAxiom> types = ontology.getAnnotationPropertyRangeAxioms(prop);
+		
+		for (OWLAnnotationPropertyRangeAxiom ax : types) {
+			return ax.getRange();
+		}
+		return null;
+	}
+	
+    private boolean isComplexProperty(OWLAnnotationProperty prop) {
+    	
+		if (complexProperties.size() == 0) {
+			getComplexProperties();
+		}
+		
+		if(complexProperties.contains(prop)) {
+			return true;
+		}
+		return false;
+	}
+    
+    private List<OWLEntity> getRequiredAnnotationList(OWLAnnotationProperty prop) {
+    	ClientSession clientSession = ClientSession.getInstance(editorKit);
+    	LocalHttpClient lhc = (LocalHttpClient) clientSession.getActiveClient();
+		if (lhc != null) {
+			Project project = null;
+			try {
+				project = lhc.getCurrentConfig().getProject(clientSession.getActiveProject());
+			} catch (UnknownProjectIdException e) {
+				e.printStackTrace();
+			}
+
+			if (project != null) {
+				com.google.common.base.Optional<ProjectOptions> options = project.getOptions();
+				if (options.isPresent()) {
+					ProjectOptions opts = options.get();
+					Set<String> dependents = opts.getValues(prop.getIRI().toString());
+					if (dependents != null) {
+						for (String dp : dependents) {
+							OWLAnnotationProperty dpProp = lookUp(dp);
+							requiredAnnotationPropertyList.add(dpProp);
+							/*if (dpProp != null) {
+								// always add to cprops
+								cprops.add(dpProp);
+								if (is_required(dpProp)) {
+									dprops.add(dpProp);
+								} else {
+									oprops.add(dpProp);
+								}
+							} else {
+								not_found_props.add(dp);
+							}	*/							
+						}
+					}
+				}
+			}
+		}
+		
+    	return requiredAnnotationPropertyList;
+    }
+	
 }
