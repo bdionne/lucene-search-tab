@@ -20,7 +20,7 @@
         <class value="org.protege.editor.owl.ui.OWLWorkspaceViewsTab"/>
         <index value="X"/>
         <editorKitId value="OWLEditorKit"/>
-        <defaultViewConfigFileName value="viewconfig.xml"/>
+        <defaultViewConfigFileName value="viewconfig_lst.xml"/>
     </extension>
 
     <!-- Views -->
