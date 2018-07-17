@@ -509,7 +509,7 @@ public class IncQualsOWLCellRenderer implements TableCellRenderer, TreeCellRende
     			List<OWLEntity> quals = depMap.get(ent);
     			if (quals != null) {
     				for (OWLEntity e : quals) {
-    					rendering += "\n  " + e.getIRI().getShortForm();
+    					rendering += "\n  " + getOWLModelManager().getRendering(e);
     				}
     			}
     			
