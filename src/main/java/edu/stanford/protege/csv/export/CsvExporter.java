@@ -170,14 +170,21 @@ public class CsvExporter {
         for(OWLAnnotationAssertionAxiom ax : axioms) {
             if(ax.getProperty().equals(property)) {
             	String next_val = "";
-                OWLAnnotationValue annValue = ax.getValue();
+            	OWLAnnotationValue annValue = ax.getValue();
                 if (annValue instanceof IRI) {
                 	if(useCurrentRendering) {
-                        next_val = ((IRI) annValue).getShortForm();
+                		Set<OWLEntity> classes = ont.getEntitiesInSignature((IRI) annValue);
+                		if (classes.isEmpty()) {
+                			next_val = annValue.toString();
+                		} else {
+                			for (OWLEntity et : classes) {
+                				next_val = getRendering(et.asOWLClass());
+                			}
+                		}
+                        //next_val = ((IRI) annValue).getShortForm();
                     } else {
                         next_val = annValue.toString();
-                    }
-                	
+                    }               	
 
                 } else {
                 	next_val = getRendering(annValue);
