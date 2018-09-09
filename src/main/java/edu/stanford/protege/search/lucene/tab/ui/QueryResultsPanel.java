@@ -3,7 +3,6 @@ package edu.stanford.protege.search.lucene.tab.ui;
 import com.google.common.collect.ImmutableList;
 import edu.stanford.protege.csv.export.ui.ExportDialogPanel;
 import edu.stanford.protege.search.lucene.tab.engine.FilteredQuery;
-import edu.stanford.protege.search.lucene.tab.engine.QueryType;
 
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.ui.error.ErrorLogPanel;
@@ -11,9 +10,7 @@ import org.protege.editor.core.ui.util.AugmentedJTextField;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.event.EventType;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
-import org.protege.editor.owl.model.find.OWLEntityFinder;
 import org.protege.editor.owl.ui.renderer.OWLCellRenderer;
-import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLProperty;
 import org.semanticweb.owlapi.util.OWLObjectTypeIndexProvider;
@@ -22,8 +19,8 @@ import org.semanticweb.owlapi.util.ProgressMonitor;
 import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
@@ -82,13 +79,36 @@ public class QueryResultsPanel extends JPanel implements Disposable {
         setLayout(new BorderLayout());
         setupProgressBar();
 
+        OWLCellRenderer renderer = new OWLCellRenderer(editorKit);
+        renderer.setWrap(true);
         results = new JList<>();
-        results.setCellRenderer(new OWLCellRenderer(editorKit));
+        results.setCellRenderer(renderer);
         results.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        results.setFixedCellHeight(21);
+        //results.setFixedCellHeight(21);
         results.addMouseListener(listMouseListener);
         results.addKeyListener(listKeyListener);
+        
+        results.addAncestorListener(new AncestorListener() {
 
+			@Override
+			public void ancestorAdded(AncestorEvent event) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void ancestorRemoved(AncestorEvent event) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void ancestorMoved(AncestorEvent event) {
+				setListData(getResults(), true);
+				
+			}
+        });
+        
         JPanel resultsPanel = new JPanel(new BorderLayout());
         JScrollPane scrollPane = new JScrollPane(results);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
