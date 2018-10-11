@@ -9,8 +9,6 @@ import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.util.OWLObjectTypeIndexProvider;
 
 import edu.stanford.protege.search.lucene.tab.ui.LuceneUiUtils;
-import uk.ac.manchester.cs.owl.owlapi.OWLObjectImplWithoutEntityAndAnonCaching;
-
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;

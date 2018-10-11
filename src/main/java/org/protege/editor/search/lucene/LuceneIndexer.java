@@ -56,7 +56,7 @@ import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.model.OWLSymmetricObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
-import org.semanticweb.owlapi.util.AxiomSubjectProvider;
+import org.semanticweb.owlapi.util.AxiomSubjectProviderEx;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -207,7 +207,7 @@ public class LuceneIndexer extends AbstractLuceneIndexer {
             //@formatter:on
             private void visitLogicalAxiom(OWLAxiom axiom) {
                 Document doc = new Document();
-                OWLObject subject = new AxiomSubjectProvider().getSubject(axiom);
+                OWLObject subject = new AxiomSubjectProviderEx().getSubject(axiom);
                 if (subject instanceof OWLEntity) {
                     OWLEntity entity = (OWLEntity) subject;
                     doc.add(new TextField(IndexField.ENTITY_IRI, getEntityId(entity), Store.YES));

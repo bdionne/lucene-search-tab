@@ -5,7 +5,7 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.util.OWLObjectVisitorAdapter;
+import org.semanticweb.owlapi.model.OWLObjectVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +18,7 @@ import java.util.Set;
  * Bio-Medical Informatics Research Group<br>
  * Date: 04/11/2015
  */
-public abstract class AbstractLuceneIndexer extends OWLObjectVisitorAdapter {
+public abstract class AbstractLuceneIndexer implements OWLObjectVisitor {
 
     protected static final Logger logger = LoggerFactory.getLogger(AbstractLuceneIndexer.class);
 

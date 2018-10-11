@@ -1,9 +1,9 @@
 package edu.stanford.protege.search.lucene.tab.ui;
 
 import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.util.OWLOntologyChangeVisitorAdapter;
+import org.semanticweb.owlapi.model.OWLOntologyChangeVisitor;
 
-public class OwlEntityComboBoxChangeHandler extends OWLOntologyChangeVisitorAdapter {
+public class OwlEntityComboBoxChangeHandler implements OWLOntologyChangeVisitor {
 
     private OwlEntityComboBox comboBox;
 

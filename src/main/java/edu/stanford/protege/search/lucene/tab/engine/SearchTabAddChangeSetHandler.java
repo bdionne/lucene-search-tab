@@ -8,11 +8,12 @@ import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.search.lucene.AddChangeSetHandler;
 import org.protege.editor.search.lucene.IndexField;
 import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.util.AxiomSubjectProvider;
+import org.semanticweb.owlapi.util.AxiomSubjectProviderEx;
 import org.semanticweb.owlapi.vocab.XSDVocabulary;
 
 import edu.stanford.protege.search.lucene.tab.ui.LuceneUiUtils;
 
+import java.util.Collection;
 import java.util.Set;
 
 public class SearchTabAddChangeSetHandler extends AddChangeSetHandler implements OWLAxiomVisitor {
@@ -137,7 +138,7 @@ public class SearchTabAddChangeSetHandler extends AddChangeSetHandler implements
     @Override
     public void visit(OWLEquivalentClassesAxiom axiom) {
         visitLogicalAxiom(axiom);
-        Set<OWLSubClassOfAxiom> subClassAxioms = axiom.asOWLSubClassOfAxioms();
+        Collection<OWLSubClassOfAxiom> subClassAxioms = axiom.asOWLSubClassOfAxioms();
         for (OWLSubClassOfAxiom sc : subClassAxioms) {
             sc.accept(this);
         }
@@ -178,7 +179,7 @@ public class SearchTabAddChangeSetHandler extends AddChangeSetHandler implements
     //@formatter:on
     private void visitLogicalAxiom(OWLAxiom axiom) {
         Document doc = new Document();
-        OWLObject subject = new AxiomSubjectProvider().getSubject(axiom);
+        OWLObject subject = new AxiomSubjectProviderEx().getSubject(axiom);
         if (subject instanceof OWLEntity) {
             OWLEntity entity = (OWLEntity) subject;
             doc.add(new TextField(IndexField.ENTITY_IRI, getIri(entity), Store.YES));

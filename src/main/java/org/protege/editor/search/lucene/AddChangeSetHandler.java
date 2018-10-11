@@ -20,12 +20,12 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.util.OWLOntologyChangeVisitorAdapter;
+import org.semanticweb.owlapi.model.OWLOntologyChangeVisitor;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class AddChangeSetHandler extends OWLOntologyChangeVisitorAdapter {
+public class AddChangeSetHandler implements OWLOntologyChangeVisitor {
 
     private final OWLEditorKit editorKit;
 

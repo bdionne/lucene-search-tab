@@ -1,5 +1,6 @@
 package edu.stanford.protege.search.lucene.tab.engine;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -69,7 +70,6 @@ import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.model.OWLSymmetricObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
-import org.semanticweb.owlapi.util.AxiomSubjectProvider;
 import org.semanticweb.owlapi.vocab.XSDVocabulary;
 
 import edu.stanford.protege.search.lucene.tab.ui.LuceneUiUtils;
@@ -231,7 +231,7 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
             @Override
             public void visit(OWLEquivalentClassesAxiom axiom) {
                 visitLogicalAxiom(axiom);
-                Set<OWLSubClassOfAxiom> subClassAxioms = axiom.asOWLSubClassOfAxioms();
+                Collection<OWLSubClassOfAxiom> subClassAxioms = axiom.asOWLSubClassOfAxioms();
                 for (OWLSubClassOfAxiom sc : subClassAxioms) {
                     sc.accept(this);
                 }
@@ -300,7 +300,7 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
             //@formatter:on
             private void visitLogicalAxiom(OWLAxiom axiom) {
                 Document doc = new Document();
-                OWLObject subject = new AxiomSubjectProvider().getSubject(axiom);
+                OWLObject subject = new org.semanticweb.owlapi.util.AxiomSubjectProviderEx().getSubject(axiom);
                 if (subject instanceof OWLEntity) {
                     OWLEntity entity = (OWLEntity) subject;
                     doc.add(new StringField(IndexField.ENTITY_IRI, getEntityId(entity), Store.YES));

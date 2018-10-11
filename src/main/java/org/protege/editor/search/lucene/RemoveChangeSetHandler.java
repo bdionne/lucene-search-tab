@@ -17,14 +17,14 @@ import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.RemoveAxiom;
-import org.semanticweb.owlapi.util.OWLOntologyChangeVisitorAdapter;
+import org.semanticweb.owlapi.model.OWLOntologyChangeVisitor;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class RemoveChangeSetHandler extends OWLOntologyChangeVisitorAdapter {
+public class RemoveChangeSetHandler implements OWLOntologyChangeVisitor {
 
     private final OWLEditorKit editorKit;
 
