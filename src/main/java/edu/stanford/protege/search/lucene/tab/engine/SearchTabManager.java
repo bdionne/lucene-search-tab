@@ -294,7 +294,7 @@ public class SearchTabManager extends LuceneSearcher {
         try {
             indexer.doIndex(indexDelegator, searchContext, progress -> fireIndexingProgressed(progress));
         }
-        catch (IOException e) {
+        catch (Exception e) {
             logger.error("... build index failed", e);
         }
         finally {

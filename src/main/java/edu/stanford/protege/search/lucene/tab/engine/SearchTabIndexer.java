@@ -2,6 +2,7 @@ package edu.stanford.protege.search.lucene.tab.engine;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.lucene.document.Document;
@@ -102,18 +103,20 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
             public Set<Document> getIndexDocuments() {
                 return documents;
             }
+            
+            private void visAnnAxes(OWLEntity ent, OWLOntology ont) {
+            	ent.accept(this);
+            	ont.annotationAssertionAxioms(ent.getIRI()).forEach(ax ->
+            	ax.accept(this));
+            	
+            }
 
             @Override
             public void visit(OWLOntology ontology) {
-                for (OWLEntity entity : ontology.getSignature()) {
-                    entity.accept(this);
-                    for (OWLAnnotationAssertionAxiom axiom : ontology.getAnnotationAssertionAxioms(entity.getIRI())) {
-                        axiom.accept(this);
-                    }
-                }
-                for (OWLAxiom axiom : ontology.getLogicalAxioms()) {
-                    axiom.accept(this);
-                }
+            	ontology.unsortedSignature().forEach(e -> visAnnAxes(e, ontology)); 
+            		
+            	ontology.logicalAxioms().forEach(ax -> ax.accept(this));
+                
             }
 
             @Override
@@ -160,34 +163,39 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
 
             @Override
             public void visit(OWLAnnotationAssertionAxiom axiom) {
-                if (axiom.getSubject() instanceof IRI) {
-                    Document doc = new Document();
-                    OWLEntity entity = getOWLEntity((IRI) axiom.getSubject());
-                    doc.add(new StringField(IndexField.ENTITY_IRI, getEntityId(entity), Store.YES));
-                    //doc.add(new TextField(IndexField.DISPLAY_NAME, getDisplayName(entity), Store.YES));
-                    doc.add(new StringField(IndexField.ANNOTATION_IRI, getEntityId(axiom.getProperty()), Store.YES));
-                    //doc.add(new StringField(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(axiom.getProperty()), Store.YES));
-                    OWLAnnotationValue value = axiom.getAnnotation().getValue();
-                    
-                    doc = LuceneUiUtils.addPropValToDoc(doc, value);
-                    
-                    documents.add(doc);
-                    // add annotations on annotations
-                    for (OWLAnnotation ann : axiom.getAnnotations()) {
-                    	doc = new Document();
-                    	doc.add(new StringField(IndexField.ENTITY_IRI, getEntityId(entity), Store.YES));
-                        //doc.add(new TextField(IndexField.DISPLAY_NAME, getDisplayName(entity), Store.YES));
-                        
-                        doc.add(new StringField(IndexField.ANNOTATION_IRI, getEntityId(ann.getProperty()), Store.YES));
-                        //doc.add(new TextField(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(ann.getProperty()), Store.YES));
-                       
-                        value = ann.getValue();
-                        doc = LuceneUiUtils.addPropValToDoc(doc, value);
-                        
-                        documents.add(doc);
-                    	
-                    }
-                }
+            	if (axiom.getSubject() instanceof IRI) {
+            		Document doc = new Document();
+            		Optional<OWLEntity> opt_entity = getOWLEntity((IRI) axiom.getSubject());
+            		if (opt_entity.isPresent()) {
+            			OWLEntity entity = opt_entity.get();
+            			doc.add(new StringField(IndexField.ENTITY_IRI, getEntityId(entity), Store.YES));
+            			//doc.add(new TextField(IndexField.DISPLAY_NAME, getDisplayName(entity), Store.YES));
+            			doc.add(new StringField(IndexField.ANNOTATION_IRI, getEntityId(axiom.getProperty()), Store.YES));
+            			//doc.add(new StringField(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(axiom.getProperty()), Store.YES));
+            			OWLAnnotationValue value = axiom.getAnnotation().getValue();
+
+            			doc = LuceneUiUtils.addPropValToDoc(doc, value);
+
+            			documents.add(doc);
+            			// add annotations on annotations
+            			for (OWLAnnotation ann : axiom.getAnnotations()) {
+            				doc = new Document();
+            				doc.add(new StringField(IndexField.ENTITY_IRI, getEntityId(entity), Store.YES));
+            				//doc.add(new TextField(IndexField.DISPLAY_NAME, getDisplayName(entity), Store.YES));
+
+            				doc.add(new StringField(IndexField.ANNOTATION_IRI, getEntityId(ann.getProperty()), Store.YES));
+            				//doc.add(new TextField(IndexField.ANNOTATION_DISPLAY_NAME, getDisplayName(ann.getProperty()), Store.YES));
+
+            				value = ann.getValue();
+            				doc = LuceneUiUtils.addPropValToDoc(doc, value);
+
+            				documents.add(doc);
+
+            			}
+            		} else {
+            			System.out.println("The bad entity: " + axiom);
+            		}
+            	}
             }
             
             
@@ -315,8 +323,8 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
              * Utility methods
              */
 
-            private OWLEntity getOWLEntity(IRI identifier) {
-                return entityFinder.getEntities(identifier).stream().findFirst().get();
+            private Optional<OWLEntity> getOWLEntity(IRI identifier) {
+                return entityFinder.getEntities(identifier).stream().findFirst();
             }
 
             private String getEntityId(OWLEntity entity) {
