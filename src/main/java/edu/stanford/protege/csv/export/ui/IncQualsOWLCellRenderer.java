@@ -460,6 +460,7 @@ public class IncQualsOWLCellRenderer implements TableCellRenderer, TreeCellRende
     private ActiveEntityVisitor activeEntityVisitor = new ActiveEntityVisitor();
 
 
+    
     private Component prepareRenderer(Object value, boolean isSelected, boolean hasFocus) {
         renderingComponent.setOpaque(isSelected || opaque);
 
@@ -478,8 +479,9 @@ public class IncQualsOWLCellRenderer implements TableCellRenderer, TreeCellRende
             }
         }
 
-
-        prepareTextPane(getRendering(value), isSelected);
+        EntityType entityType = OWLUtilities.getEntityType(value);
+        
+        prepareTextPane(getRendering(value), isSelected, entityType);
 
         if (isSelected) {
             renderingComponent.setBackground(SELECTION_BACKGROUND);
@@ -495,7 +497,6 @@ public class IncQualsOWLCellRenderer implements TableCellRenderer, TreeCellRende
         renderingComponent.revalidate();
         return renderingComponent;
     }
-
 
     protected String getRendering(Object object) {
     	if (object instanceof OWLObject) {
@@ -656,7 +657,7 @@ public class IncQualsOWLCellRenderer implements TableCellRenderer, TreeCellRende
     }
 
 
-    private void prepareTextPane(Object value, boolean selected) {
+    private void prepareTextPane(Object value, boolean selected, EntityType entityType) {
 
         textPane.setBorder(null);
         String theVal = value.toString();
@@ -722,7 +723,7 @@ public class IncQualsOWLCellRenderer implements TableCellRenderer, TreeCellRende
             }
         }
 
-        highlightText(doc, selected);
+        highlightText(doc, selected, entityType);
         if(selected) {
             if (selectionForeground != null) {
                 doc.setCharacterAttributes(0, doc.getLength(), selectionForeground, false);
@@ -731,7 +732,7 @@ public class IncQualsOWLCellRenderer implements TableCellRenderer, TreeCellRende
     }
 
 
-    protected void highlightText(StyledDocument doc, boolean selected) {
+    protected void highlightText(StyledDocument doc, boolean selected, EntityType entityType) {
         // Highlight text
         StringTokenizer tokenizer = new StringTokenizer(textPane.getText(), " []{}(),\n\t'", true);
         linkRendered = false;
@@ -750,7 +751,7 @@ public class IncQualsOWLCellRenderer implements TableCellRenderer, TreeCellRende
                     }
                 }
             }
-            renderToken(curToken, tokenStartIndex, doc, selected);
+            renderToken(curToken, tokenStartIndex, doc, selected, entityType);
 
             tokenStartIndex += curToken.length();
         }
@@ -764,7 +765,7 @@ public class IncQualsOWLCellRenderer implements TableCellRenderer, TreeCellRende
     private boolean linkRendered = false;
     private boolean parenthesisRendered = false;
 
-    protected void renderToken(final String curToken, final int tokenStartIndex, final StyledDocument doc, boolean selected) {
+    protected void renderToken(final String curToken, final int tokenStartIndex, final StyledDocument doc, boolean selected, EntityType entityType) {
 
         boolean enclosedByBracket = false;
         if (parenthesisRendered){
@@ -782,7 +783,7 @@ public class IncQualsOWLCellRenderer implements TableCellRenderer, TreeCellRende
         }
         else {
             // Not a keyword, so might be an entity (or delim)
-            final OWLEntity curEntity = getOWLModelManager().getOWLEntityFinder().getOWLEntity(curToken);
+            final OWLEntity curEntity = getOWLModelManager().getOWLEntityFinder().getOWLEntity(curToken, entityType);
             if (curEntity != null) {
                 if (focusedEntity != null && !selected) {
                     if (curEntity.equals(focusedEntity)) {
