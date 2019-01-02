@@ -220,7 +220,7 @@ public class SearchQueryTest {
                 KoalaOntology.rdfsSeeAlso,
                 KoalaOntology.rdfsLabel,
                 KoalaOntology.rdfsComment,
-                KoalaOntology.rdfPlainLiteral,
+                KoalaOntology.xsdString,
                 KoalaOntology.xsdBoolean));
         
         /*
@@ -495,7 +495,7 @@ public class SearchQueryTest {
                 KoalaOntology.rdfsSeeAlso,
                 KoalaOntology.rdfsLabel,
                 KoalaOntology.rdfsComment,
-                KoalaOntology.rdfPlainLiteral,
+                KoalaOntology.xsdString,
                 KoalaOntology.xsdBoolean,
                 KoalaOntology._male,
                 KoalaOntology._female,

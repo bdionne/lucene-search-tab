@@ -135,7 +135,7 @@ public final class KoalaOntology {
     public static final OWLAnnotationProperty rdfsSeeAlso = AnnotationProperty(IRI(Namespaces.RDFS + "seeAlso"));
     public static final OWLAnnotationProperty rdfsLabel = AnnotationProperty(IRI(Namespaces.RDFS + "label"));
     public static final OWLAnnotationProperty rdfsComment = AnnotationProperty(IRI(Namespaces.RDFS + "comment"));
-    public static final OWLDatatype rdfPlainLiteral = Datatype(IRI(Namespaces.RDF + "PlainLiteral"));
+    public static final OWLDatatype xsdString = Datatype(IRI(Namespaces.XSD + "string"));
     public static final OWLDatatype xsdBoolean = Datatype(IRI(Namespaces.XSD + "boolean"));
 
     public static final OWLAnnotationAssertionAxiom femaleLabel = AnnotationAssertion(rdfsLabel, femaleIri, PlainLiteral("Female"));
@@ -151,7 +151,7 @@ public final class KoalaOntology {
         gender, female, marsupials, student, koalaWithPhd, university, koala, animal, habitat, forest, rainForest,
         dryEucalyptForest, parent, graduateStudent, quokka, tasmanianDevil, maleStudentWith3Daughters, degree, male,
         person, hasHabitat, hasDegree, hasChildren, hasGender, isHardWorking, owlThing, owlVersionInfo, rdfsSeeAlso,
-        rdfsLabel, rdfsComment, rdfPlainLiteral, xsdBoolean, _male, _female, _ba, _bs, _ma, _phd
+        rdfsLabel, rdfsComment, xsdString, xsdBoolean, _male, _female, _ba, _bs, _ma, _phd
     );
 
     /**
