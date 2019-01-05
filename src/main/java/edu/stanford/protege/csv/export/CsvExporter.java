@@ -13,6 +13,8 @@ import org.semanticweb.owlapi.reasoner.structural.StructuralReasoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.manchester.cs.owl.owlapi.OWLObjectIntersectionOfImpl;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -238,16 +240,16 @@ public class CsvExporter {
             for (OWLAxiom axiom : ont.getAxioms((OWLClass) entity, Imports.INCLUDED)) {
                 if(axiom.getSignature().contains(property)) {
                     if(axiom.getAxiomType().equals(AxiomType.SUBCLASS_OF)) {
-                        Optional<String> filler = getFillerForAxiom((OWLSubClassOfAxiom)axiom, entity, property);
-                        if(filler.isPresent()) {
-                            values.add(filler.get());
-                        }
+                    	List<String> fillerList = getFillerListForAxiom((OWLSubClassOfAxiom)axiom, entity, property);
+                    	if( fillerList != null && fillerList.size() > 0 ) {
+                    		values.addAll(fillerList);
+                    	}
                     } else if (axiom.getAxiomType().equals(AxiomType.EQUIVALENT_CLASSES)) {
                         OWLSubClassOfAxiom subClassOfAxiom = ((OWLEquivalentClassesAxiom) axiom).asOWLSubClassOfAxioms().iterator().next();
-                        Optional<String> filler = getFillerForAxiom(subClassOfAxiom, entity, property);
-                        if(filler.isPresent()) {
-                            values.add(filler.get());
-                        }
+                        List<String> fillerList = getFillerListForAxiom(subClassOfAxiom, entity, property);
+                        if( fillerList != null && fillerList.size() > 0 ) {
+                    		values.addAll(fillerList);
+                    	}
                     }
                 }
             }
@@ -274,16 +276,36 @@ public class CsvExporter {
         }
         return values;
     }
-
-    private Optional<String> getFillerForAxiom(OWLSubClassOfAxiom axiom, OWLEntity entity, OWLEntity property) {
-        String filler = null;
-        OWLClassExpression ce;
+    
+    private List<String> getFillerListForAxiom(OWLSubClassOfAxiom axiom, OWLEntity entity, OWLEntity property) {
+    	OWLClassExpression ce;
+    	List<String> fillerList = new ArrayList<String>();
+    	Optional<String> filler;
         if(axiom.getSubClass().equals(entity)) {
             ce = axiom.getSuperClass();
         } else {
             ce = axiom.getSubClass();
         }
-        ce.accept(visitor);
+        if (ce instanceof OWLObjectIntersectionOfImpl) {
+        	OWLObjectIntersectionOfImpl oiof = (OWLObjectIntersectionOfImpl)ce;
+        	List<OWLClassExpression> operands = oiof.getOperandsAsList();
+        	for (OWLClassExpression operand : operands) {
+        		filler = getFillerForAxiom( operand, entity, property);
+        		if( filler.isPresent()) {
+        			fillerList.add(filler.get());
+        		}
+        	}
+        }
+        else {
+        	filler = getFillerForAxiom(ce, entity, property);
+        	fillerList.add(filler.get());
+        }
+        return fillerList;
+    }
+
+    private Optional<String> getFillerForAxiom(OWLClassExpression ce, OWLEntity entity, OWLEntity property) {
+    	String filler = null;
+    	ce.accept(visitor);
         Optional<OWLEntity> optProp = visitor.getProperty();
         if(optProp.isPresent() && optProp.get().equals(property)) {
             Optional<OWLObject> optFiller = visitor.getFiller();
@@ -292,8 +314,9 @@ public class CsvExporter {
             }
         }
         return Optional.ofNullable(filler);
-    }
 
+    }
+    
     private String getSuperclasses(OWLEntity e, OWLReasoner reasoner) {
         Set<OWLClass> superclasses = reasoner.getSuperClasses(e.asOWLClass(), true).getFlattened();
         String output = "";
