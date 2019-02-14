@@ -84,30 +84,11 @@ public class QueryResultsPanel extends JPanel implements Disposable {
         results = new JList<>();
         results.setCellRenderer(renderer);
         results.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        //results.setFixedCellHeight(21);
+        
         results.addMouseListener(listMouseListener);
         results.addKeyListener(listKeyListener);
         
-        results.addAncestorListener(new AncestorListener() {
-
-			@Override
-			public void ancestorAdded(AncestorEvent event) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void ancestorRemoved(AncestorEvent event) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void ancestorMoved(AncestorEvent event) {
-				setListData(getResults(), true);
-				
-			}
-        });
+        
         
         JPanel resultsPanel = new JPanel(new BorderLayout());
         JScrollPane scrollPane = new JScrollPane(results);
