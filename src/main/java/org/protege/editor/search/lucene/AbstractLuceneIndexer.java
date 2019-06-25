@@ -42,17 +42,15 @@ public abstract class AbstractLuceneIndexer implements OWLObjectVisitor {
         return textAnalyzer;
     }
 
-    public abstract IndexItemsCollector getIndexItemsCollector();
+    public abstract IndexItemsCollector getIndexItemsCollector(IndexDelegator delegator, IndexProgressListener listener);
 
     public void doIndex(IndexDelegator delegator, SearchContext context, IndexProgressListener listener) throws IOException {
-        IndexItemsCollector collector = getIndexItemsCollector();
+        IndexItemsCollector collector = getIndexItemsCollector(delegator, listener);
         for (OWLOntology ontology : context.getOntologies()) {
             logger.info("... collecting items to index from {}", ontology.getOntologyID().getDefaultDocumentIRI().get());
             ontology.accept(collector);
         }
-        Set<Document> documents = collector.getIndexDocuments();
-        logger.info("... found {} items to index", documents.size());
-        delegator.buildIndex(documents, listener);
+        delegator.commitIndex();
     }
 
     public void doAppend(IndexDelegator delegator, AddChangeSet changeSet) throws IOException {

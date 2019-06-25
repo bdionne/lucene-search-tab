@@ -15,8 +15,10 @@ import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.find.OWLEntityFinder;
 import org.protege.editor.search.lucene.AbstractLuceneIndexer;
+import org.protege.editor.search.lucene.IndexDelegator;
 import org.protege.editor.search.lucene.IndexField;
 import org.protege.editor.search.lucene.IndexItemsCollector;
+import org.protege.editor.search.lucene.AbstractLuceneIndexer.IndexProgressListener;
 import org.semanticweb.owlapi.model.HasFiller;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
@@ -85,6 +87,8 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
 
     private final OWLEntityFinder entityFinder;
     private final OWLModelManager objectRenderer;
+    
+    
 
     public SearchTabIndexer(OWLEditorKit editorKit) {
         super(new ClassicWhitespaceAnalyzer());
@@ -93,17 +97,16 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
     }
 
     @Override
-    public IndexItemsCollector getIndexItemsCollector() {
+    public IndexItemsCollector getIndexItemsCollector(IndexDelegator delegator, IndexProgressListener listener) {
+    	
 
         return new IndexItemsCollector() {
 
-            private Set<Document> documents = new HashSet<>();
-
-            @Override
-            public Set<Document> getIndexDocuments() {
-                return documents;
-            }
+            private Document doc = new Document();
             
+            private IndexDelegator delg = delegator;
+            private IndexProgressListener listen = listener;
+
             private void visAnnAxes(OWLEntity ent, OWLOntology ont) {
             	ent.accept(this);
             	ont.annotationAssertionAxioms(ent.getIRI()).forEach(ax ->
@@ -113,6 +116,10 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
 
             @Override
             public void visit(OWLOntology ontology) {
+            	
+            	// estimate for current thesaurus, don't know the total docs offhand
+            	// this is only needed to accomodate current progress bar semantics
+            	delg.setTotalDocsSize(4500000);
             	ontology.unsortedSignature().forEach(e -> visAnnAxes(e, ontology)); 
             		
             	ontology.logicalAxioms().forEach(ax -> ax.accept(this));
@@ -121,50 +128,55 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
 
             @Override
             public void visit(OWLClass cls) {
-                Document doc = new Document();
+            	doc = new Document();
                 doc.add(new TextField(IndexField.ENTITY_IRI, getEntityId(cls), Store.YES));
                 doc.add(new TextField(IndexField.DISPLAY_NAME, getDisplayName(cls), Store.YES));
                 doc.add(new StringField(IndexField.ENTITY_TYPE, getType(cls), Store.YES));
-                documents.add(doc);
+                
+                delg.buildIndex(doc, listen);
             }
 
             @Override
             public void visit(OWLObjectProperty property) {
-                Document doc = new Document();
+                doc = new Document();
                 doc.add(new TextField(IndexField.ENTITY_IRI, getEntityId(property), Store.YES));
                 doc.add(new TextField(IndexField.DISPLAY_NAME, getDisplayName(property), Store.YES));
                 doc.add(new StringField(IndexField.ENTITY_TYPE, getType(property), Store.YES));
-                documents.add(doc);
+               
+                delg.buildIndex(doc, listen);
             }
 
             public void visit(OWLDataProperty property) {
-                Document doc = new Document();
+                doc = new Document();
                 doc.add(new TextField(IndexField.ENTITY_IRI, getEntityId(property), Store.YES));
                 doc.add(new TextField(IndexField.DISPLAY_NAME, getDisplayName(property), Store.YES));
                 doc.add(new StringField(IndexField.ENTITY_TYPE, getType(property), Store.YES));
-                documents.add(doc);
+                
+                delg.buildIndex(doc, listen);
             }
 
             public void visit(OWLNamedIndividual individual) {
-                Document doc = new Document();
+                doc = new Document();
                 doc.add(new TextField(IndexField.ENTITY_IRI, getEntityId(individual), Store.YES));
                 doc.add(new TextField(IndexField.DISPLAY_NAME, getDisplayName(individual), Store.YES));
                 doc.add(new StringField(IndexField.ENTITY_TYPE, getType(individual), Store.YES));
-                documents.add(doc);
+                
+                delg.buildIndex(doc, listen);
             }
 
             public void visit(OWLAnnotationProperty property) {
-                Document doc = new Document();
+                doc = new Document();
                 doc.add(new TextField(IndexField.ENTITY_IRI, getEntityId(property), Store.YES));
                 doc.add(new TextField(IndexField.DISPLAY_NAME, getDisplayName(property), Store.YES));
                 doc.add(new StringField(IndexField.ENTITY_TYPE, getType(property), Store.YES));
-                documents.add(doc);
+                
+                delg.buildIndex(doc, listen);
             }
 
             @Override
             public void visit(OWLAnnotationAssertionAxiom axiom) {
             	if (axiom.getSubject() instanceof IRI) {
-            		Document doc = new Document();
+            		doc = new Document();
             		Optional<OWLEntity> opt_entity = getOWLEntity((IRI) axiom.getSubject());
             		if (opt_entity.isPresent()) {
             			OWLEntity entity = opt_entity.get();
@@ -176,7 +188,8 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
 
             			doc = LuceneUiUtils.addPropValToDoc(doc, value);
 
-            			documents.add(doc);
+            			
+            			delg.buildIndex(doc, listen);
             			// add annotations on annotations
             			for (OWLAnnotation ann : axiom.getAnnotations()) {
             				doc = new Document();
@@ -189,7 +202,8 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
             				value = ann.getValue();
             				doc = LuceneUiUtils.addPropValToDoc(doc, value);
 
-            				documents.add(doc);
+            				
+            				delg.buildIndex(doc, listen);
 
             			}
             		} else {
@@ -250,7 +264,7 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
                     OWLProperty property = (OWLProperty) restriction.getProperty();
                     if (restriction instanceof HasFiller<?>) {
                         HasFiller<?> restrictionWithFiller = (HasFiller<?>) restriction;
-                        Document doc = new Document();
+                        doc = new Document();
                         if (restrictionWithFiller.getFiller() instanceof OWLClass) {
                             OWLClass filler = (OWLClass) restrictionWithFiller.getFiller();
                             doc.add(new StringField(IndexField.ENTITY_IRI, getEntityId(subclass), Store.YES));
@@ -268,7 +282,7 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
                             doc.add(new StringField(IndexField.FILLER_IRI, "", Store.NO));
                             doc.add(new TextField(IndexField.FILLER_DISPLAY_NAME, "", Store.NO));
                         }
-                        documents.add(doc);
+                        delg.buildIndex(doc, listen);
                     }
                 }
             }
@@ -307,7 +321,7 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
 
             //@formatter:on
             private void visitLogicalAxiom(OWLAxiom axiom) {
-                Document doc = new Document();
+                doc = new Document();
                 OWLObject subject = new org.semanticweb.owlapi.util.AxiomSubjectProviderEx().getSubject(axiom);
                 if (subject instanceof OWLEntity) {
                     OWLEntity entity = (OWLEntity) subject;
@@ -315,7 +329,8 @@ public class SearchTabIndexer extends AbstractLuceneIndexer {
                     doc.add(new TextField(IndexField.DISPLAY_NAME, getDisplayName(entity), Store.YES));
                     doc.add(new TextField(IndexField.AXIOM_DISPLAY_NAME, getDisplayName(axiom), Store.YES));
                     doc.add(new StringField(IndexField.AXIOM_TYPE, getType(axiom), Store.YES));
-                    documents.add(doc);
+                    
+                    delg.buildIndex(doc, listen);
                 }
             }
 

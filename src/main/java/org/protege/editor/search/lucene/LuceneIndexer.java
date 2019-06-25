@@ -7,7 +7,7 @@ import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.find.OWLEntityFinder;
 import org.protege.editor.owl.ui.renderer.context.OWLObjectRenderingContext;
 import org.protege.editor.owl.ui.renderer.styledstring.OWLObjectStyledStringRenderer;
-
+import org.protege.editor.search.lucene.AbstractLuceneIndexer.IndexProgressListener;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.StringField;
@@ -84,16 +84,13 @@ public class LuceneIndexer extends AbstractLuceneIndexer {
     }
 
     @Override
-    public IndexItemsCollector getIndexItemsCollector() {
+    public IndexItemsCollector getIndexItemsCollector(IndexDelegator delegator, IndexProgressListener listener) {
 
         return new IndexItemsCollector() {
 
             private Set<Document> documents = new HashSet<>();
 
-            @Override
-            public Set<Document> getIndexDocuments() {
-                return documents;
-            }
+            
 
             @Override
             public void visit(OWLOntology ontology) {

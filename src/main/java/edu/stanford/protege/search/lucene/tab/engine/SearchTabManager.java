@@ -149,6 +149,7 @@ public class SearchTabManager extends LuceneSearcher {
 
     @Override
     public void addProgressMonitor(ProgressMonitor pm) {
+    	//pm.setIndeterminate(true);
         progressMonitors.add(pm);
     }
 

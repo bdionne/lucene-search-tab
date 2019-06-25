@@ -76,20 +76,33 @@ public class IndexDelegator implements Disposable {
             throw new RuntimeException("Unable to read index directory", e);
         }
     }
-
-    public void buildIndex(Set<Document> documents, IndexProgressListener listener) throws IOException {
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        logger.info("... start writing index");
-        int progress = 1;
-        for (Document doc : documents) {
-            indexWriter.addDocument(doc);
-            if (listener != null) {
-                listener.fireIndexingProgressed(percentage(progress++, documents.size()));
-            }
-        }
-        commitIndex();
-        stopwatch.stop();
-        logger.info("... built index in {} ms", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    
+    private int progress = 0;
+    private int totalDocsSize = 0;
+    private int whenToReportProgress = 0;
+    
+    public void setTotalDocsSize(int s) { 
+    	totalDocsSize = s;
+    }
+    
+    public void buildIndex(Document document, IndexProgressListener listener) {
+    		progress++;
+    		whenToReportProgress++;
+        
+            try {
+				indexWriter.addDocument(document);
+				if (whenToReportProgress > 20000) {
+					int percent = percentage(progress, totalDocsSize);
+					listener.fireIndexingProgressed(percent);
+					
+					whenToReportProgress = 0;
+				}
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}       
+        
+       
     }
 
     public void appendIndex(AddChangeSet changeSet) throws IOException {
@@ -130,7 +143,7 @@ public class IndexDelegator implements Disposable {
         return indexWriter.isOpen();
     }
 
-    private void commitIndex() throws IOException {
+    public void commitIndex() throws IOException {
         if (isOpen(indexWriter)) {
             indexWriter.commit();
             indexDirty = true;
