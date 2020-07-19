@@ -61,13 +61,7 @@
             <artifactId>protege-editor-owl</artifactId>
             <version>${protege.version}</version>
         </dependency>
-        
-        <dependency>
-			<groupId>edu.stanford.protege</groupId>
-			<artifactId>protege-client</artifactId>
-			<version>3.0.1-SNAPSHOT</version>
-		</dependency>
-		
+        		
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-core</artifactId>
